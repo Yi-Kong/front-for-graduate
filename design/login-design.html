@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>登录页 · 设计稿 v4（山西能源学院）</title>
+<style>
+  :root {
+    --brand: #C0202E;        /* 山能红 */
+    --brand-dark: #8F1822;
+    --brand-soft: #fdecee;
+    --gold: #E3B23C;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: #f3f4f6;
+    min-height: 100vh;
+  }
+  .page { display: flex; min-height: 100vh; }
+
+  /* ---------- 左侧品牌区（山能红） ---------- */
+  .brand {
+    position: relative;
+    width: 45%;
+    background: linear-gradient(155deg, #C0202E 0%, #A81B28 55%, #8F1822 100%);
+    color: #fff;
+    padding: 48px 52px 40px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .brand .deco { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.06); }
+  .brand .deco.a { width: 300px; height: 300px; right: -110px; top: -90px; }
+  .brand .deco.b { width: 200px; height: 200px; right: 30px; bottom: -70px; }
+  .brand .watermark {
+    position: absolute; right: -60px; bottom: -60px;
+    width: 320px; height: 320px; opacity: .12; border-radius: 50%;
+    object-fit: contain;
+  }
+
+  .logo { display: flex; align-items: center; gap: 16px; z-index: 1; }
+  .logo .emblem {
+    width: 64px; height: 64px; flex: none; border-radius: 50%;
+    background: #fff; object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.18));
+  }
+  .logo .txt .cn { font-size: 21px; font-weight: 700; letter-spacing: 1px; }
+  .logo .txt .en { font-size: 11.5px; opacity: .82; margin-top: 3px; letter-spacing: .5px; }
+
+  .main { margin: auto 0; z-index: 1; }
+  .main .sys {
+    display: inline-block; font-size: 12px; letter-spacing: 3px;
+    color: var(--gold); border: 1px solid rgba(227,178,60,0.5);
+    padding: 4px 14px; border-radius: 999px; margin-bottom: 22px;
+  }
+  .main h1 { font-size: 38px; font-weight: 700; line-height: 1.35; letter-spacing: 2px; }
+  .main .intro {
+    font-size: 14.5px; opacity: .88; margin-top: 20px;
+    max-width: 400px; line-height: 1.9;
+  }
+  .motto {
+    margin-top: 34px; border-left: 3px solid var(--gold); padding-left: 16px;
+  }
+  .motto .big { font-size: 24px; font-weight: 700; letter-spacing: 5px; }
+  .motto .small { font-size: 12px; opacity: .8; margin-top: 5px; letter-spacing: 1px; }
+
+  .brand .foot { font-size: 12px; opacity: .6; z-index: 1; }
+
+  /* ---------- 右侧表单区 ---------- */
+  .panel { flex: 1; background: #fff; display: flex; align-items: center; justify-content: center; padding: 40px; }
+  .card { width: 100%; max-width: 380px; }
+  .card .top { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .card .top svg, .card .top .mark { width: 26px; height: 26px; }
+  .card .top .mark { border-radius: 50%; background: #fff; object-fit: contain; }
+  .card .top span { font-size: 13px; color: var(--muted); }
+  .card h2 { font-size: 24px; font-weight: 700; }
+  .card .lead { font-size: 13.5px; color: var(--muted); margin-top: 8px; margin-bottom: 26px; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; color: #374151; margin-bottom: 7px; font-weight: 500; }
+  .input {
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 0 13px; height: 46px; background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .input:focus-within { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(192,32,46,.12); }
+  .input svg { flex: none; }
+  .input input { flex: 1; border: none; outline: none; font-size: 14px; color: var(--ink); background: transparent; }
+  .input .eye { cursor: pointer; color: #9ca3af; display: flex; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 22px; }
+  .remember { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #4b5563; cursor: pointer; }
+  .remember input { width: 15px; height: 15px; accent-color: var(--brand); }
+  .forgot { font-size: 13px; color: var(--brand); text-decoration: none; }
+
+  .btn {
+    width: 100%; height: 48px; border: none; border-radius: 10px;
+    background: var(--brand); color: #fff; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background .15s, transform .05s;
+  }
+  .btn:hover { background: var(--brand-dark); }
+  .btn:active { transform: translateY(1px); }
+
+  .hint {
+    margin-top: 18px; display: flex; gap: 10px; align-items: flex-start;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 12px 13px; font-size: 12.5px; color: #92400e; line-height: 1.6;
+  }
+  .hint svg { flex: none; margin-top: 1px; }
+
+  .demo { margin-top: 22px; border-top: 1px dashed var(--line); padding-top: 16px; }
+  .demo .t { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .demo .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .demo .chip {
+    font-size: 12px; padding: 5px 11px; border-radius: 999px;
+    background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #f6d3d7;
+  }
+
+  @media (max-width: 820px) { .brand { display: none; } .panel { padding: 24px; } }
+</style>
+</head>
+<body>
+  <div class="page">
+    <!-- 左侧品牌区 -->
+    <aside class="brand">
+      <div class="deco a"></div>
+      <div class="deco b"></div>
+      <img class="watermark" src="school-logo.png" alt="" />
+
+      <div class="logo">
+        <img class="emblem" src="school-logo.png" alt="山西能源学院校徽" />
+        <div class="txt">
+          <div class="cn">山西能源学院</div>
+          <div class="en">SHANXI INSTITUTE OF ENERGY</div>
+        </div>
+      </div>
+
+      <div class="main">
+        <span class="sys">统一身份认证 · UNIFIED LOGIN</span>
+        <h1>毕业设计<br/>综合管理系统</h1>
+        <p class="intro">本系统服务于山西能源学院毕业设计全过程管理，覆盖届次与师生账号管理、题目申报查重与审核发布、两轮选题及指导关系生成等核心环节，为管理员、教师与学生提供协同工作环境。</p>
+
+        <div class="motto">
+          <div class="big">立德强能&nbsp;笃学善行</div>
+          <div class="small">校&nbsp;训 · MOTTO</div>
+        </div>
+      </div>
+
+      <div class="foot">© 2026 山西能源学院 · 毕业设计综合管理系统</div>
+    </aside>
+
+    <!-- 右侧表单区 -->
+    <main class="panel">
+      <div class="card">
+        <div class="top">
+          <img class="mark" src="school-logo.png" alt="校徽" />
+          <span>统一身份认证</span>
+        </div>
+
+        <h2>欢迎登录</h2>
+        <p class="lead">请使用账号密码登录您的账户</p>
+
+        <form onsubmit="return false">
+          <div class="field">
+            <label for="acc">账号</label>
+            <div class="input">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="#9ca3af" stroke-width="1.7"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="#9ca3af" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <input id="acc" type="text" placeholder="请输入账号 / 工号 / 学号" autocomplete="username" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="pwd">密码</label>
+            <div class="input">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="11" rx="2" stroke="#9ca3af" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#9ca3af" stroke-width="1.7"/></svg>
+              <input id="pwd" type="password" placeholder="请输入密码" autocomplete="current-password" />
+              <span class="eye" onclick="togglePwd()">
+                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="#9ca3af" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" stroke="#9ca3af" stroke-width="1.7"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="remember"><input type="checkbox" /> 记住我</label>
+            <a class="forgot" href="#">忘记密码？</a>
+          </div>
+
+          <button class="btn">登 录</button>
+        </form>
+
+        <div class="hint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d97706" stroke-width="1.7"/><path d="M12 7v6M12 16.5v.5" stroke="#d97706" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span>首次登录账号需修改初始密码后方可进入系统（由 <code>must_change_password</code> 控制）。</span>
+        </div>
+
+        <div class="demo">
+          <div class="t">演示账号（按角色）</div>
+          <div class="chips">
+            <span class="chip">管理员 admin</span>
+            <span class="chip">教师 teacher</span>
+            <span class="chip">学生 student</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function togglePwd() {
+      var pwd = document.getElementById('pwd');
+      var eye = document.getElementById('eyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        eye.innerHTML = '<path d="M3 3l18 18" stroke="#9ca3af" stroke-width="1.7" stroke-linecap="round"/><path d="M10.6 6.2A9.7 9.7 0 0 1 12 6c6.5 0 10 6 10 7a17 17 0 0 1-3.2 3.9M6.2 8.1A17 17 0 0 0 2 12s3.5 6 10 6a9.5 9.5 0 0 0 3.4-.6" stroke="#9ca3af" stroke-width="1.7"/>';
+      } else {
+        pwd.type = 'password';
+        eye.innerHTML = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="#9ca3af" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" stroke="#9ca3af" stroke-width="1.7"/>';
+      }
+    }
+  </script>
+</body>
+</html>
