@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>应用外壳 + 工作台 · 设计稿 v2（山西能源学院）</title>
+<style>
+  :root {
+    --brand: #C0202E;        /* 山能红 */
+    --brand-deep: #A81B28;
+    --brand-dark: #8F1822;
+    --brand-soft: #fdecee;
+    --gold: #E3B23C;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: #eef0f3;
+    min-height: 100vh;
+  }
+
+  /* 设计稿预览用：角色切换条 */
+  .role-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: #111827; color: #e5e7eb;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; font-size: 12.5px;
+  }
+  .role-bar .lbl { opacity: .75; letter-spacing: .5px; }
+  .role-bar button {
+    border: 1px solid #374151; background: transparent; color: #d1d5db;
+    font-size: 12.5px; padding: 4px 14px; border-radius: 999px; cursor: pointer;
+    transition: all .15s;
+  }
+  .role-bar button:hover { border-color: #6b7280; }
+  .role-bar button.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+  .role-bar .tip { margin-left: auto; opacity: .55; font-size: 11.5px; }
+
+  .shell { display: flex; min-height: calc(100vh - 37px); }
+
+  /* ---------- 左侧应用外壳侧边栏 ---------- */
+  .sidebar {
+    width: 248px; flex: none; background: #fff;
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    position: sticky; top: 37px; height: calc(100vh - 37px);
+  }
+  .brand-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 18px 16px; border-bottom: 1px solid var(--line);
+  }
+  .brand-head .emblem { width: 30px; height: 30px; border-radius: 50%; background: #fff; object-fit: contain; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .brand-head .cn { font-size: 15px; font-weight: 700; letter-spacing: .5px; line-height: 1.2; }
+  .brand-head .en { font-size: 10px; color: var(--muted); letter-spacing: .5px; margin-top: 2px; }
+
+  .nav { flex: 1; overflow-y: auto; padding: 14px 12px; }
+  .group-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; padding: 12px 12px 6px; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 3px;
+    font-size: 14px; color: #374151; text-decoration: none; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .nav-item:hover { background: #f3f4f6; }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; }
+  .nav-item .ico { width: 18px; height: 18px; flex: none; }
+
+  .user-foot {
+    border-top: 1px solid var(--line); padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-foot .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+  .user-foot .meta { flex: 1; min-width: 0; }
+  .user-foot .name { font-size: 13.5px; font-weight: 600; }
+  .user-foot .role { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .user-foot .logout {
+    border: none; background: #f3f4f6; color: var(--muted); cursor: pointer;
+    width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s;
+  }
+  .user-foot .logout:hover { background: var(--brand-soft); color: var(--brand); }
+
+  /* ---------- 右侧主区 ---------- */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 56px; flex: none; background: #fff; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  }
+  .topbar .crumb { font-size: 13px; color: var(--muted); }
+  .topbar .crumb b { color: var(--ink); font-weight: 600; }
+  .year-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: var(--brand-dark);
+    background: var(--brand-soft); border: 1px solid #f6d3d7; border-radius: 999px; padding: 5px 13px;
+  }
+  .year-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+
+  .content { padding: 26px 28px 36px; flex: 1; }
+  .page-head { margin-bottom: 20px; }
+  .page-head h1 { font-size: 24px; font-weight: 700; letter-spacing: .5px; }
+  .page-head p { font-size: 13.5px; color: var(--muted); margin-top: 6px; }
+
+  .grid { display: grid; gap: 16px; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 980px){ .grid.cols-3 { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px;
+  }
+  .card .k { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+  .card .k .ic { width: 16px; height: 16px; color: var(--brand); }
+  .card .v { font-size: 26px; font-weight: 700; margin-top: 12px; letter-spacing: .5px; }
+  .card .sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+  .card .v.sm { font-size: 18px; }
+
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 11px; border-radius: 999px; }
+  .pill.live { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .pill.wait { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .pill.done { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; }
+
+  .section { margin-top: 24px; }
+  .section .h { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section .h .bar { width: 4px; height: 16px; border-radius: 2px; background: var(--brand); }
+
+  /* 时间轴 */
+  .timeline { position: relative; padding-left: 22px; }
+  .timeline::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+  .tl-item { position: relative; padding: 0 0 18px 6px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item .node { position: absolute; left: -22px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--brand); }
+  .tl-item.live .node { background: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
+  .tl-item.wait .node { border-color: #f59e0b; }
+  .tl-item.done .node { border-color: #6366f1; background: #6366f1; }
+  .tl-item .t { font-size: 14px; font-weight: 600; }
+  .tl-item .d { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+  /* 空态 */
+  .empty {
+    border: 1px dashed #d1d5db; border-radius: 12px; padding: 30px 20px; text-align: center; color: var(--muted);
+    background: #fafafa;
+  }
+  .empty .ic { width: 30px; height: 30px; color: #cbd5e1; margin: 0 auto 10px; }
+  .empty .t { font-size: 14px; font-weight: 600; color: #4b5563; }
+  .empty .s { font-size: 12.5px; margin-top: 5px; }
+
+  .note {
+    margin-top: 22px; display: flex; gap: 10px; align-items: flex-start;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 12px 14px; font-size: 12.5px; color: #92400e; line-height: 1.65;
+  }
+  .note svg { flex: none; margin-top: 1px; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <!-- 设计稿预览切换条（实际系统按登录 role_codes 自动渲染，无此条） -->
+  <div class="role-bar">
+    <span class="lbl">设计稿预览 · 切换角色查看菜单差异：</span>
+    <button id="btn-admin" class="on" onclick="setRole('admin')">管理员</button>
+    <button id="btn-teacher" onclick="setRole('teacher')">教师</button>
+    <button id="btn-student" onclick="setRole('student')">学生</button>
+    <span class="tip">实际实现：菜单组按登录返回的 role_codes 过滤，无此切换条</span>
+  </div>
+
+  <div class="shell">
+    <!-- ===== 应用外壳：侧边栏（按 role_codes 过滤） ===== -->
+    <aside class="sidebar">
+      <div class="brand-head">
+        <img class="emblem" src="school-logo.png" alt="校徽" />
+        <div>
+          <div class="cn">毕业设计综合管理系统</div>
+          <div class="en">SHANXI INSTITUTE OF ENERGY</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="group-label">通用</div>
+        <a class="nav-item active">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
+          工作台
+        </a>
+
+        <!-- 仅 ADMIN 可见 -->
+        <div id="grp-admin">
+          <div class="group-label">管理员</div>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            届次管理
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 3v12M12 15v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8 7h8M8 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            师生批量导入
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/></svg>
+            题目审核
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            选题轮次管理
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M5 5h14v14H5z" stroke="currentColor" stroke-width="1.7"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            操作日志
+          </a>
+        </div>
+
+        <!-- 仅 TEACHER 可见 -->
+        <div id="grp-teacher" class="hidden">
+          <div class="group-label">教师</div>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 19V5a1 1 0 0 1 1-1h9l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 4v5h5" stroke="currentColor" stroke-width="1.7"/></svg>
+            我的题目申报
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="16" cy="10" r="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M14 19c0-2 1.6-3.6 3.6-3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            我的指导情况
+          </a>
+        </div>
+
+        <!-- 仅 STUDENT 可见 -->
+        <div id="grp-student" class="hidden">
+          <div class="group-label">学生</div>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            题目浏览
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M5 12.5 10 17l9-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            我的选题
+          </a>
+        </div>
+      </nav>
+
+      <div class="user-foot">
+        <div class="avatar" id="u-avatar">管</div>
+        <div class="meta">
+          <div class="name" id="u-name">王管理员</div>
+          <div class="role" id="u-role">管理员 · ADMIN</div>
+        </div>
+        <button class="logout" title="退出登录">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===== 主区：工作台（#3） ===== -->
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">毕业设计综合管理系统 / <b>工作台</b></div>
+        <span class="year-badge"><span class="dot"></span> 当前届次：2026 届</span>
+      </header>
+
+      <div class="content">
+        <div class="page-head">
+          <h1>工作台</h1>
+          <p id="page-sub">当前学年毕业设计全流程概览，按您的角色展示待办与阶段进度。</p>
+        </div>
+
+        <!-- 概览卡片 -->
+        <div class="grid cols-3">
+          <div class="card">
+            <div class="k"><svg class="ic" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7"/></svg>当前届次</div>
+            <div class="v">2026 届</div>
+            <div class="sub">状态：已激活 · 全局数据以此过滤</div>
+          </div>
+          <div class="card">
+            <div class="k"><svg class="ic" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>当前阶段</div>
+            <div class="v sm">题目申报中</div>
+            <div class="sub">截止：2026-03-15 23:59</div>
+          </div>
+          <div class="card">
+            <div class="k"><svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 5 5.5.8-4 3.9 1 5.5L12 21l-5 2.2 1-5.5-4-3.9 5.5-.8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>我的待办</div>
+            <div class="v">0</div>
+            <div class="sub">暂无待处理事项</div>
+          </div>
+        </div>
+
+        <!-- 流程时间轴 -->
+        <div class="section">
+          <div class="h"><span class="bar"></span> 流程阶段时间轴</div>
+          <div class="card">
+            <div class="timeline">
+              <div class="tl-item done">
+                <span class="node"></span>
+                <div class="t">届次与师生准备 <span class="pill done">已结束</span></div>
+                <div class="d">2025-09-01 ~ 2025-12-31</div>
+              </div>
+              <div class="tl-item live">
+                <span class="node"></span>
+                <div class="t">题目申报与查重 <span class="pill live">进行中</span></div>
+                <div class="d">2026-01-01 ~ 2026-03-15 · 距截止 21 天</div>
+              </div>
+              <div class="tl-item wait">
+                <span class="node"></span>
+                <div class="t">题目审核与发布 <span class="pill wait">未开始</span></div>
+                <div class="d">2026-03-16 ~ 2026-04-10</div>
+              </div>
+              <div class="tl-item wait">
+                <span class="node"></span>
+                <div class="t">第一轮选题 <span class="pill wait">未开始</span></div>
+                <div class="d">2026-04-11 ~ 2026-04-25</div>
+              </div>
+              <div class="tl-item wait">
+                <span class="node"></span>
+                <div class="t">第二轮选题 <span class="pill wait">未开始</span></div>
+                <div class="d">2026-04-26 ~ 2026-05-10</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 按角色待办（空态） -->
+        <div class="section">
+          <div class="h"><span class="bar"></span> 按角色待办</div>
+          <div class="card">
+            <div class="empty">
+              <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M5 5h14v14H5z" stroke="currentColor" stroke-width="1.7"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <div class="t">暂无待办事项</div>
+              <div class="s">当前账号在本届次下没有需要处理的任务。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d97706" stroke-width="1.7"/><path d="M12 7v6M12 16.5v.5" stroke="#d97706" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span><b>说明：</b>① 侧边栏菜单组按登录返回的 <code>role_codes</code> 过滤（本稿顶部切换条仅用于设计稿预览，实际系统无此条）；② <code>/api/home/overview/</code> 的 <code>todos</code> 固定 <code>{count:0}</code> → 待办区展示空态；③ <code>AcademicStageConfig</code> 暂无 CRUD 接口，时间轴以后端补齐配置后才有真实数据，本稿以「代表性阶段」示意布局。</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    var ROLES = {
+      admin:   { grp: 'grp-admin',   avatar: '管', name: '王管理员', role: '管理员 · ADMIN',
+                 sub: '当前学年毕业设计全流程概览，按管理员视角展示全局进度与待办。' },
+      teacher: { grp: 'grp-teacher', avatar: '李', name: '李老师',   role: '教师 · TEACHER',
+                 sub: '当前学年毕业设计全流程概览，教师可在此查看申报与指导相关待办。' },
+      student: { grp: 'grp-student', avatar: '张', name: '张同学',   role: '学生 · STUDENT',
+                 sub: '当前学年毕业设计全流程概览，学生可在此查看选题阶段与个人待办。' }
+    };
+    function setRole(r) {
+      ['admin','teacher','student'].forEach(function(k){
+        document.getElementById('grp-' + k).classList.toggle('hidden', k !== r);
+        document.getElementById('btn-' + k).classList.toggle('on', k === r);
+      });
+      var c = ROLES[r];
+      document.getElementById('u-avatar').textContent = c.avatar;
+      document.getElementById('u-name').textContent = c.name;
+      document.getElementById('u-role').textContent = c.role;
+      document.getElementById('page-sub').textContent = c.sub;
+    }
+  </script>
+</body>
+</html>
