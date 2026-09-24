@@ -29,6 +29,9 @@ export function mockPlugin(options = {}) {
     const files = fs
       .readdirSync(dir)
       .filter((f) => /\.(js|mjs|ts|mts|cts)$/.test(f))
+      // 跳过以下划线开头的依赖模块（如 _shared.js）：它们只作为其他 mock 的 import 依赖，
+      // 不直接作为路由源；若不跳过，plugin 用 ?t= 额外加载会与其被裸 import 的实例分裂，造成共享状态双实例。
+      .filter((f) => !f.startsWith('_'))
     const all = []
     for (const file of files) {
       // 追加时间戳以绕过 ESM 模块缓存，实现 mock 文件热更新
@@ -55,24 +58,23 @@ export function mockPlugin(options = {}) {
         if (!cache) cache = await loadMocks()
         const url = (req.url || '').split('?')[0]
         const method = (req.method || 'get').toLowerCase()
-        const match = cache.find(
-          (m) => m.url === url && m.method.toLowerCase() === method,
-        )
-        if (!match) return next()
+        const matched = matchMock(cache, url, method)
+        if (!matched) return next()
 
         let body = {}
         if (['post', 'put', 'delete', 'patch'].includes(method)) {
           body = await readBody(req)
         }
         const result =
-          typeof match.response === 'function'
-            ? await match.response({
+          typeof matched.mock.response === 'function'
+            ? await matched.mock.response({
                 body,
                 query: parseQuery(req.url),
                 headers: req.headers,
                 req,
+                params: matched.params,
               })
-            : match.response
+            : matched.mock.response
 
         const payload =
           typeof result === 'string' ? result : JSON.stringify(result)
@@ -94,6 +96,33 @@ export function mockPlugin(options = {}) {
       if (enabled) attach(server)
     },
   }
+}
+
+function matchMock(mocks, url, method) {
+  // 1) 精确匹配优先（向后兼容既有 mock，如 /api/home/overview/）
+  const exact = mocks.find(
+    (m) => m.url === url && m.method.toLowerCase() === method,
+  )
+  if (exact) return { mock: exact, params: {} }
+  // 2) 参数化匹配：url 段支持 :name 占位（如 /api/academic-years/:id/activate/）
+  const uSegs = url.split('/').filter(Boolean)
+  for (const m of mocks) {
+    if (m.method.toLowerCase() !== method) continue
+    const mSegs = m.url.split('/').filter(Boolean)
+    if (mSegs.length !== uSegs.length) continue
+    const params = {}
+    let ok = true
+    for (let i = 0; i < mSegs.length; i++) {
+      if (mSegs[i].startsWith(':')) {
+        params[mSegs[i].slice(1)] = decodeURIComponent(uSegs[i])
+      } else if (mSegs[i] !== uSegs[i]) {
+        ok = false
+        break
+      }
+    }
+    if (ok) return { mock: m, params }
+  }
+  return null
 }
 
 function readBody(req) {

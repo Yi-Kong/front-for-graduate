@@ -2,12 +2,13 @@
 // 对齐后端 GET /api/home/overview/：返回当前届次 / 当前阶段 / 流程时间轴 / 待办。
 // 注意：后端 home_overview 的 todos 固定 {count:0}，时间轴读 AcademicStageConfig（暂无配置接口）；
 // 本 mock 提供「代表性阶段」数据供 UI 落地，真实字段以后端为准。
+import { currentAcademicYear } from './_shared.js'
 export default [
   {
     url: '/api/home/overview/',
     method: 'get',
     response: () => ({
-      academic_year: { id: 1, name: '2026 届', is_active: true },
+      academic_year: currentAcademicYear(),
       stage: {
         name: '题目申报与查重',
         deadline: '2026-03-15T23:59:00',

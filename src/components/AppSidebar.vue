@@ -1,11 +1,13 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import SchoolEmblem from '@/components/SchoolEmblem.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
+const sidebarOpen = inject('sidebarOpen')
+const closeSidebar = inject('closeSidebar')
 
 const ROLE_LABEL = { ADMIN: '管理员', TEACHER: '教师', STUDENT: '学生' }
 
@@ -92,7 +94,10 @@ function onLogout() {
 </script>
 
 <template>
-  <aside class="flex w-[248px] shrink-0 flex-col border-r border-gray-200 bg-white">
+  <aside
+    class="fixed inset-y-0 left-0 z-40 flex w-[248px] shrink-0 flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:static md:translate-x-0"
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+  >
     <!-- 品牌头 -->
     <div class="flex items-center gap-3 border-b border-gray-200 px-[18px] py-[18px]">
       <SchoolEmblem :size="30" />
@@ -112,6 +117,7 @@ function onLogout() {
           :to="{ name: item.to }"
           class="mb-0.5 flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[14px] text-gray-700 no-underline transition hover:bg-gray-100"
           active-class="bg-[#fdecee] font-semibold text-[#8F1822]"
+          @click="closeSidebar"
         >
           <span class="ico" v-html="ICONS[item.icon]"></span>
           <span>{{ item.label }}</span>
