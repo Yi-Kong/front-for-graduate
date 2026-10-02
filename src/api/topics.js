@@ -12,3 +12,14 @@ export function getTopics(params = {}) {
 export function getTopicDetail(id) {
   return request.get(`/topics/${id}/`)
 }
+
+// 审核通过：状态置 PUBLISHED。按后端契约校正——approve 不应传系统自动生成字段，
+// 发送空 body 即可（DRF 仅改状态）。
+export function approveTopic(id) {
+  return request.post(`/topics/${id}/approve/`, {})
+}
+
+// 退回修改：状态置 REJECTED，body 仅传 comment（退回意见）。
+export function rejectTopic(id, comment) {
+  return request.post(`/topics/${id}/reject/`, { comment })
+}

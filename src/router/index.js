@@ -7,6 +7,7 @@ import ComingSoon from '@/views/ComingSoon.vue'
 import AcademicYear from '@/views/admin/AcademicYear.vue'
 import ImportUsers from '@/views/admin/ImportUsers.vue'
 import OperationLog from '@/views/admin/OperationLog.vue'
+import TopicReview from '@/views/admin/TopicReview.vue'
 import { useAuthStore } from '@/store/auth'
 
 const routes = [
@@ -32,7 +33,7 @@ const routes = [
   // 管理员
   { path: '/academic-years', name: 'academic-years', component: AcademicYear, meta: { title: '届次管理', layout: 'app', roles: ['ADMIN'] } },
   { path: '/import-users', name: 'import-users', component: ImportUsers, meta: { title: '师生批量导入', layout: 'app', roles: ['ADMIN'] } },
-  { path: '/topic-review', name: 'topic-review', component: ComingSoon, meta: { title: '题目审核', layout: 'app', roles: ['ADMIN'] } },
+  { path: '/topic-review', name: 'topic-review', component: TopicReview, meta: { title: '题目审核', layout: 'app', roles: ['ADMIN'] } },
   { path: '/selection-rounds', name: 'selection-rounds', component: ComingSoon, meta: { title: '选题轮次管理', layout: 'app', roles: ['ADMIN'] } },
   { path: '/operation-logs', name: 'operation-logs', component: OperationLog, meta: { title: '操作日志', layout: 'app', roles: ['ADMIN'] } },
   // 教师

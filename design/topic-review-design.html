@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>题目审核 · 设计稿 v1</title>
+<style>
+  :root{
+    --red:#C0202E; --red-deep:#A81B28; --red-dark:#8F1822;
+    --ink:#1f2937; --gray:#6b7280; --line:#e5e7eb; --bg:#f5f6f8;
+    --gold:#E3B23C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.6}
+  .shell{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .sidebar{width:220px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;padding:18px 18px;border-bottom:1px solid var(--line)}
+  .emblem{width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--red);flex:none}
+  .brand b{font-size:14.5px;font-weight:700}
+  .brand span{display:block;font-size:11px;color:var(--gray);font-weight:500}
+  .nav{padding:10px 10px;flex:1}
+  .nav .grp{font-size:11px;color:#9ca3af;font-weight:600;padding:12px 12px 6px}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:#4b5563;font-weight:600;text-decoration:none;font-size:13.5px;margin-bottom:2px}
+  .nav a .dot{width:7px;height:7px;border-radius:50%;background:#d1d5db;flex:none}
+  .nav a.active{background:#fdecee;color:var(--red-dark)}
+  .nav a.active .dot{background:var(--red)}
+  .nav a:hover:not(.active){background:#f9fafb}
+
+  /* Main */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:10}
+  .topbar .motto{font-size:13px;color:var(--gray);letter-spacing:1px}
+  .user{display:flex;align-items:center;gap:10px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .user .nm{font-size:13.5px;font-weight:600}
+  .user .rl{font-size:11.5px;color:var(--gray)}
+
+  .content{padding:24px 28px;max-width:1180px;width:100%}
+  .phead{margin-bottom:18px}
+  .phead h1{font-size:24px;font-weight:700;letter-spacing:.5px}
+  .phead p{margin-top:6px;color:var(--gray);font-size:13.5px;max-width:780px}
+
+  /* Filter bar */
+  .filter{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12.5px;font-weight:700;color:#374151}
+  .field input,.field select{height:40px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font-size:14px;color:var(--ink);outline:none;background:#fff}
+  .field input:focus,.field select:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,32,46,.1)}
+  .seg{display:inline-flex;background:#f3f4f6;border-radius:10px;padding:3px}
+  .seg button{border:none;background:transparent;padding:7px 13px;border-radius:8px;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer}
+  .seg button.on{background:#fff;color:var(--red-dark);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--line);background:#fff;height:40px;padding:0 16px;border-radius:10px;font-size:14px;font-weight:600;color:#374151;cursor:pointer}
+  .btn:hover{background:#f9fafb}
+  .btn.primary{background:var(--red);color:#fff;border-color:var(--red)}
+  .btn.primary:hover{background:var(--red-dark)}
+
+  /* Table */
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  thead th{background:#f9fafb;text-align:left;font-size:12.5px;font-weight:700;color:#6b7280;padding:12px 18px}
+  tbody td{padding:14px 18px;border-top:1px solid #f3f4f6;font-size:14px;vertical-align:middle}
+  tbody tr:hover{background:#fafafa}
+  .ttl{font-weight:700;color:var(--ink);cursor:pointer}
+  .ttl:hover{color:var(--red)}
+  .sub{font-size:12.5px;color:#9ca3af;margin-top:2px}
+  .badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+  .b-amber{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+  .b-green{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+  .b-red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+  .b-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+  .b-purple{background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe}
+  .b-gray{background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb}
+  .act{display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#4b5563;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px}
+  .act:hover{background:#f9fafb}
+  .act.p{color:var(--red);background:#fdecee;border-color:#f6d3d7}
+  .act.p:hover{background:#fbdde0}
+  .count{margin:14px 2px;font-size:13px;color:var(--gray)}
+  .count b{color:var(--ink)}
+
+  /* Drawer */
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40}
+  .drawer{position:fixed;top:0;right:0;height:100vh;width:480px;max-width:calc(100vw - 32px);background:#fff;z-index:50;box-shadow:-12px 0 40px rgba(0,0,0,.18);display:flex;flex-direction:column}
+  .dh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px;border-bottom:1px solid var(--line)}
+  .dh h3{font-size:18px;font-weight:700;line-height:1.45}
+  .dh .x{width:30px;height:30px;border-radius:9px;background:#f3f4f6;color:#9ca3af;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:16px}
+  .dbody{flex:1;overflow:auto;padding:20px}
+  .kv{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f3f4f6}
+  .kv .k{width:84px;flex:none;font-size:13px;font-weight:600;color:#9ca3af}
+  .kv .v{font-size:14px;color:#374151}
+  .note{margin:14px 0;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:13px;color:#92400e}
+  .note b{color:#b45309}
+  .dfoot{border-top:1px solid var(--line);padding:16px 20px;display:flex;gap:10px}
+  .dfoot .btn{flex:1;height:42px}
+  .dfoot .btn.p{background:var(--red);color:#fff;border-color:var(--red)}
+  .dfoot .btn.p:hover{background:var(--red-dark)}
+  .dfoot .btn.o{color:var(--red);border-color:#f6d3d7;background:#fdecee}
+
+  /* Reject modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px}
+  .mcard{background:#fff;border-radius:16px;width:440px;max-width:100%;padding:22px}
+  .mcard h4{font-size:16px;font-weight:700;margin-bottom:4px}
+  .mcard p{font-size:13px;color:var(--gray);margin-bottom:14px}
+  .mcard textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;outline:none;resize:vertical}
+  .mcard textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,32,46,.1)}
+  .mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--red-dark);background:#fdecee;border:1px solid #f6d3d7;border-radius:999px;padding:2px 9px;margin-left:8px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="emblem">能</div>
+      <div><b>毕业设计系统</b><span>山西能源学院</span></div>
+    </div>
+    <nav class="nav">
+      <div class="grp">通用</div>
+      <a href="#"><span class="dot"></span>工作台</a>
+      <div class="grp">管理后台</div>
+      <a href="#"><span class="dot"></span>届次管理</a>
+      <a href="#"><span class="dot"></span>师生批量导入</a>
+      <a href="#" class="active"><span class="dot"></span>题目审核</a>
+      <a href="#"><span class="dot"></span>选题轮次管理</a>
+      <a href="#"><span class="dot"></span>操作日志</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="motto">立德强能 · 笃学善行</div>
+      <div class="user">
+        <div class="avatar">管</div>
+        <div><div class="nm">系统管理员</div><div class="rl">ADMIN</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="phead">
+        <h1>题目审核</h1>
+        <p>审核教师提交的毕业设计题目。待审核题目需确认内容合规、与既有题目无重复后，执行「审核通过」发布，或「退回修改」并填写意见。仅管理员可执行审核操作。</p>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter">
+        <div class="field">
+          <label>状态</label>
+          <div class="seg">
+            <button class="on">待审核</button>
+            <button>已发布</button>
+            <button>退回修改</button>
+            <button>全部</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>关键词</label>
+          <input placeholder="按题目名称搜索" />
+        </div>
+        <div class="field">
+          <label>所属学年</label>
+          <select><option>全部学年</option><option>2026 届</option><option>2025 届</option></select>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn">重置</button>
+        <button class="btn primary">查询</button>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:32%">题目名称</th>
+              <th style="width:15%">指导教师</th>
+              <th style="width:13%">题目来源</th>
+              <th style="width:13%">所属学年</th>
+              <th style="width:12%">状态</th>
+              <th style="width:15%">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="ttl">基于深度学习的校园能耗预测系统</div><div class="sub">ID 1024</div></td>
+              <td>教师 #37</td>
+              <td><span class="badge b-blue">教师申报</span></td>
+              <td>2026 届</td>
+              <td><span class="badge b-amber">待审核</span></td>
+              <td><button class="act p">审核</button></td>
+            </tr>
+            <tr>
+              <td><div class="ttl">煤矿巷道围岩稳定性数值模拟分析</div><div class="sub">ID 1021</div></td>
+              <td>教师 #12</td>
+              <td><span class="badge b-blue">教师申报</span></td>
+              <td>2026 届</td>
+              <td><span class="badge b-amber">待审核</span></td>
+              <td><button class="act p">审核</button></td>
+            </tr>
+            <tr>
+              <td><div class="ttl">智能仓储机器人路径规划算法研究</div><div class="sub">ID 1009</div></td>
+              <td>教师 #45</td>
+              <td><span class="badge b-purple">管理员录入</span></td>
+              <td>2026 届</td>
+              <td><span class="badge b-amber">待审核</span></td>
+              <td><button class="act p">审核</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="count">共 <b>3</b> 条待审核题目 · 第 <b>1</b> / 1 页</div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Drawer (默认展开，供评审查看审核交互) -->
+<div class="mask"></div>
+<aside class="drawer">
+  <div class="dh">
+    <div>
+      <h3>基于深度学习的校园能耗预测系统<span class="tag">待审核</span></h3>
+      <div style="font-size:12.5px;color:#9ca3af;margin-top:6px">教师申报 · 2026 届</div>
+    </div>
+    <div class="x">✕</div>
+  </div>
+  <div class="dbody">
+    <div class="kv"><div class="k">题目来源</div><div class="v">教师申报</div></div>
+    <div class="kv"><div class="k">指导教师</div><div class="v">教师 #37</div></div>
+    <div class="kv"><div class="k">申报人</div><div class="v">教师 #37</div></div>
+    <div class="kv"><div class="k">所属学年</div><div class="v">2026 届</div></div>
+    <div class="kv"><div class="k">状态</div><div class="v"><span class="badge b-amber">待审核</span></div></div>
+    <div class="kv" style="flex-direction:column;align-items:stretch">
+      <div class="k" style="width:auto;margin-bottom:6px">题目描述</div>
+      <div style="border:1px solid var(--line);background:#f9fafb;border-radius:10px;padding:14px;font-size:14px;color:#374151;line-height:1.75">
+        面向校园建筑能耗数据，采用 LSTM 等深度学习模型进行短期与中长期能耗预测，为节能调度提供决策支持。需完成数据清洗、模型训练与可视化平台搭建。
+      </div>
+    </div>
+    <!-- 查重提示：后端无独立复核接口，此处为缺口占位，不假装实现 -->
+    <div class="note">
+      <b>查重提示（待后端补齐）：</b>后端暂未提供疑似重复题目的复核接口，本条「待审核」题目无法在此确认是否与他人题目重复。建议后端补充 duplicate-check 复核能力后，此处展示查重相似度与复核入口。
+    </div>
+  </div>
+  <div class="dfoot">
+    <button class="btn o">退回修改</button>
+    <button class="btn p">审核通过</button>
+  </div>
+</aside>
+
+<!-- Reject Modal (点击"退回修改"展开，供评审查看) -->
+<div class="modal">
+  <div class="mcard">
+    <h4>退回修改</h4>
+    <p>请填写退回原因，教师将在「我的题目申报」中看到该意见。</p>
+    <textarea placeholder="例如：题目与往年题目重复度较高，请调整研究切入点；或描述过于简略，需补充技术路线。"></textarea>
+    <div class="mfoot">
+      <button class="btn">取消</button>
+      <button class="btn primary">确认退回</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
