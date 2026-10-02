@@ -8,13 +8,9 @@ const { data: overview, isLoading, isError, error } = useQuery({
   queryFn: getOverview,
 })
 
-const yearName = computed(() => overview.value?.academic_year?.name || '—')
-const stageName = computed(() => overview.value?.stage?.name || '—')
-const stageDeadline = computed(() => {
-  const d = overview.value?.stage?.deadline
-  if (!d) return ''
-  return String(d).replace('T', ' ').slice(0, 16)
-})
+const yearName = computed(() => overview.value?.academic_year || '—')
+const stageName = computed(() => overview.value?.current_stage || '—')
+const stageDeadline = computed(() => '')
 const timeline = computed(() => overview.value?.timeline || [])
 const todosCount = computed(() => overview.value?.todos?.count ?? 0)
 
@@ -23,6 +19,20 @@ const STAGE_PILL = {
   done: 'bg-[#eef2ff] text-[#4338ca] border-[#c7d2fe]',
   live: 'bg-[#ecfdf5] text-[#047857] border-[#a7f3d0]',
   wait: 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]',
+}
+
+// 文档 timeline 仅给 display_name/start_time/deadline/overdue，无 status 枚举；
+// 是否「进行中」由 overdue 与当前时间相对 start_time/deadline 推导。
+function stageStatus(s) {
+  if (!s) return 'wait'
+  if (s.overdue) return 'done'
+  const start = new Date(s.start_time).getTime()
+  const end = new Date(s.deadline).getTime()
+  if (Number.isNaN(start) || Number.isNaN(end)) return 'wait'
+  const now = Date.now()
+  if (now < start) return 'wait'
+  if (now > end) return 'done'
+  return 'live'
 }
 </script>
 
@@ -81,19 +91,19 @@ const STAGE_PILL = {
               <span
                 class="absolute -left-[22px] top-[3px] h-3.5 w-3.5 rounded-full border-[3px] border-[#C0202E] bg-white"
                 :class="{
-                  'border-[#C0202E] bg-[#C0202E] shadow-[0_0_0_4px_#fdecee]': s.status === 'live',
-                  'border-[#f59e0b] bg-white': s.status === 'wait',
-                  'border-[#6366f1] bg-[#6366f1]': s.status === 'done',
+                  'border-[#C0202E] bg-[#C0202E] shadow-[0_0_0_4px_#fdecee]': stageStatus(s) === 'live',
+                  'border-[#f59e0b] bg-white': stageStatus(s) === 'wait',
+                  'border-[#6366f1] bg-[#6366f1]': stageStatus(s) === 'done',
                 }"
               ></span>
               <div class="text-[14px] font-semibold">
-                {{ s.name }}
+                {{ s.display_name }}
                 <span
                   class="ml-1 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[12px] font-semibold"
-                  :class="STAGE_PILL[s.status]"
-                >{{ STAGE_LABEL[s.status] }}</span>
+                  :class="STAGE_PILL[stageStatus(s)]"
+                >{{ STAGE_LABEL[stageStatus(s)] }}</span>
               </div>
-              <div class="mt-1 text-[12.5px] text-gray-400">{{ s.start }} ~ {{ s.end }}</div>
+              <div class="mt-1 text-[12.5px] text-gray-400">{{ s.start_time }} ~ {{ s.deadline }}</div>
             </div>
           </div>
         </div>

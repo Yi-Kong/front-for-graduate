@@ -21,8 +21,8 @@ watch(
     if (props.mode === 'edit' && props.initial) {
       form.value = {
         name: props.initial.name,
-        start_year: props.initial.start_year,
-        end_year: props.initial.end_year,
+        start_year: props.initial.start_date ? Number(props.initial.start_date.slice(0, 4)) : '',
+        end_year: props.initial.end_date ? Number(props.initial.end_date.slice(0, 4)) : '',
         set_current: false,
       }
     } else {
@@ -47,12 +47,14 @@ function validate() {
 
 function onSubmit() {
   if (!validate()) return
-  emit('submit', {
+  const payload = {
     name: form.value.name.trim(),
-    start_year: Number(form.value.start_year),
-    end_year: Number(form.value.end_year),
-    ...(props.mode === 'create' ? { set_current: form.value.set_current } : {}),
-  })
+    start_date: `${form.value.start_year}-09-01`,
+    end_date: `${form.value.end_year}-07-31`,
+    status: props.mode === 'create' ? 'DRAFT' : props.initial?.status || 'DRAFT',
+  }
+  if (props.mode === 'create') payload.is_current = form.value.set_current
+  emit('submit', payload)
 }
 </script>
 

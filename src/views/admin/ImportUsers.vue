@@ -24,7 +24,7 @@ const showModal = ref(false)
 const successMsg = ref('')
 
 const current = computed(() => TEMPLATES[activeTab.value])
-const noLabel = computed(() => (activeTab.value === 'teachers' ? '工号' : '学号'))
+const noLabel = computed(() => '字段')
 
 function switchTab(type) {
   if (type === activeTab.value) return
@@ -60,13 +60,16 @@ const { data: batchErrors } = useQuery({
   queryFn: () => getImportErrors(batchId.value),
   enabled: computed(() => !!batchId.value),
 })
-const errorList = computed(() => batchErrors.value?.errors || [])
+const errorList = computed(() => batchErrors.value || [])
 
 // 提交导入（写库）。语义以真实后端为准：此处按「整批提交→部分成功」模型返回摘要。
 const commitMutation = useMutation({
   mutationFn: () => commitImport(activeTab.value, batchId.value),
   onSuccess: (res) => {
-    successMsg.value = `导入完成：成功 ${res.success_rows} 行，失败 ${res.failed_rows} 行。`
+    successMsg.value =
+      activeTab.value === 'students'
+        ? `导入完成：成功写入 ${res.success_rows} 名学生。`
+        : `导入完成：新建 ${res.created} 名、更新 ${res.updated} 名教师。`
     stage.value = 'upload'
     file.value = null
     batchId.value = null
@@ -96,8 +99,8 @@ function downloadTemplate() {
 }
 function downloadErrors() {
   if (!errorList.value.length) return
-  const header = ['行号', noLabel.value, '姓名', '错误信息']
-  const rows = errorList.value.map((e) => [e.row, e.no, e.name, e.message].join(','))
+  const header = ['行号', noLabel.value, '原始值', '错误信息']
+  const rows = errorList.value.map((e) => [e.row_no, e.field_name, e.raw_value, e.error_message].join(','))
   triggerCsv('导入错误明细.csv', [header.join(','), ...rows].join('\n'))
 }
 </script>
@@ -211,16 +214,16 @@ function downloadErrors() {
                 <tr class="bg-gray-50 text-left text-[12.5px] font-semibold text-gray-500">
                   <th class="px-5 py-3" style="width: 12%">行号</th>
                   <th class="px-5 py-3" style="width: 22%">{{ noLabel }}</th>
-                  <th class="px-5 py-3" style="width: 18%">姓名</th>
-                  <th class="px-5 py-3" style="width: 48%">校验结果</th>
+                  <th class="px-5 py-3" style="width: 18%">原始值</th>
+                  <th class="px-5 py-3" style="width: 48%">错误信息</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="e in errorList" :key="e.row" class="border-t border-gray-100 bg-[#fef2f2]">
-                  <td class="px-5 py-3 font-mono text-[13px] text-gray-700">{{ e.row }}</td>
-                  <td class="px-5 py-3 font-mono text-[13px] text-gray-700">{{ e.no }}</td>
-                  <td class="px-5 py-3 text-[14px] text-gray-800">{{ e.name }}</td>
-                  <td class="px-5 py-3 text-[13px] text-[#b91c1c]">{{ e.message }}</td>
+                <tr v-for="e in errorList" :key="e.row_no" class="border-t border-gray-100 bg-[#fef2f2]">
+                  <td class="px-5 py-3 font-mono text-[13px] text-gray-700">{{ e.row_no }}</td>
+                  <td class="px-5 py-3 font-mono text-[13px] text-gray-700">{{ e.field_name }}</td>
+                  <td class="px-5 py-3 text-[14px] text-gray-800">{{ e.raw_value }}</td>
+                  <td class="px-5 py-3 text-[13px] text-[#b91c1c]">{{ e.error_message }}</td>
                 </tr>
                 <tr v-if="!errorList.length">
                   <td colspan="4" class="px-5 py-8 text-center text-[13.5px] text-gray-400">校验全部通过，无错误行。</td>

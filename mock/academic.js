@@ -1,7 +1,7 @@
 // 届次管理 Mock（开发期，由 vite/plugin-mock.js 自动挂载）
 // 对齐后端 DRF：
 // - GET    /api/academic-years/                  列表
-// - POST   /api/academic-years/                  创建（body 含可选 set_current）
+// - POST   /api/academic-years/                  创建（body: name, start_date, end_date, status, is_current）
 // - PUT    /api/academic-years/:id/               更新
 // - POST   /api/academic-years/:id/activate/      设为当前届次
 // - DELETE /api/academic-years/:id/               删除

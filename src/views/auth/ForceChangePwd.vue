@@ -8,6 +8,7 @@ import SchoolEmblem from '@/components/SchoolEmblem.vue'
 const router = useRouter()
 const auth = useAuthStore()
 
+const oldPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const showPwd = ref(false)
@@ -25,6 +26,10 @@ const { mutate: doChange, isPending } = useMutation({
 
 function onSubmit() {
   errorMessage.value = ''
+  if (!oldPassword.value) {
+    errorMessage.value = '请输入原密码'
+    return
+  }
   if (!newPassword.value) {
     errorMessage.value = '请输入新密码'
     return
@@ -37,7 +42,7 @@ function onSubmit() {
     errorMessage.value = '两次输入的密码不一致'
     return
   }
-  doChange({ new_password: newPassword.value })
+  doChange({ old_password: oldPassword.value, new_password: newPassword.value })
 }
 </script>
 
@@ -52,6 +57,12 @@ function onSubmit() {
       <p class="mb-6 mt-2 text-[13.5px] text-gray-500">为保障账户安全，首次登录请设置新密码。</p>
 
       <form class="space-y-[18px]" @submit.prevent="onSubmit">
+        <div>
+          <label class="mb-[7px] block text-[13px] font-medium text-gray-700">原密码</label>
+          <div class="flex h-[46px] items-center gap-2.5 rounded-[10px] border border-gray-200 px-3 transition focus-within:border-[#C0202E] focus-within:ring-[3px] focus-within:ring-[#C0202E]/10">
+            <input v-model="oldPassword" :type="showPwd ? 'text' : 'password'" autocomplete="current-password" placeholder="请输入当前密码" class="h-full flex-1 border-0 bg-transparent text-[14px] text-gray-800 outline-none placeholder:text-gray-400" />
+          </div>
+        </div>
         <div>
           <label class="mb-[7px] block text-[13px] font-medium text-gray-700">新密码</label>
           <div class="flex h-[46px] items-center gap-2.5 rounded-[10px] border border-gray-200 px-3 transition focus-within:border-[#C0202E] focus-within:ring-[3px] focus-within:ring-[#C0202E]/10">

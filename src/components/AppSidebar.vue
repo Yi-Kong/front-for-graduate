@@ -83,7 +83,7 @@ const visibleGroups = computed(() => {
     .filter((g) => g.items.length > 0)
 })
 
-const userName = computed(() => auth.user?.name || '未命名用户')
+const userName = computed(() => auth.user?.real_name || '未命名用户')
 const userInitial = computed(() => (userName.value || '?').slice(0, 1))
 const userRoleLabel = computed(() => ROLE_LABEL[(auth.roleCodes || [])[0]] || '用户')
 

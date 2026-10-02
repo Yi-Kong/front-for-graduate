@@ -13,7 +13,7 @@ const { data: overview } = useQuery({
   queryFn: getOverview,
 })
 
-const currentYear = computed(() => overview.value?.academic_year?.name || '')
+const currentYear = computed(() => overview.value?.academic_year || '')
 const title = computed(() => route.meta.title || '工作台')
 </script>
 

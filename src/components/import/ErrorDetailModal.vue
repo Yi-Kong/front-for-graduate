@@ -1,6 +1,6 @@
 <script setup>
 // 导入错误明细弹窗（复用真实接口 GET /api/imports/:pk/errors/ 的数据）。
-// 纯展示组件：open 控制显隐，errors 为逐行错误数组 [{ row, no, name, message }]。
+// 纯展示组件：open 控制显隐，errors 为逐行错误数组 [{ row_no, field_name, raw_value, error_message }]。
 defineProps({
   open: { type: Boolean, default: false },
   title: { type: String, default: '当次导入错误明细' },
@@ -30,16 +30,16 @@ const emit = defineEmits(['close'])
             <tr class="text-left text-[12.5px] font-semibold text-gray-500">
               <th class="px-3 py-2" style="width: 12%">行号</th>
               <th class="px-3 py-2" style="width: 22%">{{ noLabel }}</th>
-              <th class="px-3 py-2" style="width: 18%">姓名</th>
+              <th class="px-3 py-2" style="width: 18%">原始值</th>
               <th class="px-3 py-2" style="width: 48%">错误信息</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="e in errors" :key="e.row" class="border-t border-gray-100 bg-[#fef2f2]">
-              <td class="px-3 py-2.5 font-mono text-[13px] text-gray-700">{{ e.row }}</td>
-              <td class="px-3 py-2.5 font-mono text-[13px] text-gray-700">{{ e.no }}</td>
-              <td class="px-3 py-2.5 text-[14px] text-gray-800">{{ e.name }}</td>
-              <td class="px-3 py-2.5 text-[13px] text-[#b91c1c]">{{ e.message }}</td>
+            <tr v-for="e in errors" :key="e.row_no" class="border-t border-gray-100 bg-[#fef2f2]">
+              <td class="px-3 py-2.5 font-mono text-[13px] text-gray-700">{{ e.row_no }}</td>
+              <td class="px-3 py-2.5 font-mono text-[13px] text-gray-700">{{ e.field_name }}</td>
+              <td class="px-3 py-2.5 text-[14px] text-gray-800">{{ e.raw_value }}</td>
+              <td class="px-3 py-2.5 text-[13px] text-[#b91c1c]">{{ e.error_message }}</td>
             </tr>
             <tr v-if="!errors.length">
               <td colspan="4" class="px-3 py-8 text-center text-[13.5px] text-gray-400">无错误记录</td>

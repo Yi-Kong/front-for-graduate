@@ -8,15 +8,16 @@ export default [
     response: ({ body }) => {
       const { username } = body || {}
       const profiles = {
-        admin: { name: '系统管理员', role_codes: ['ADMIN'], must_change_password: true },
-        teacher: { name: '王老师', role_codes: ['TEACHER'], must_change_password: false },
-        student: { name: '李同学', role_codes: ['STUDENT'], must_change_password: false },
+        admin: { real_name: '系统管理员', role_codes: ['ADMIN'], must_change_password: true },
+        teacher: { real_name: '王老师', role_codes: ['TEACHER'], must_change_password: false },
+        student: { real_name: '李同学', role_codes: ['STUDENT'], must_change_password: false },
       }
       const profile = profiles[username] || profiles.student
       return {
         access: 'mock-access-' + username,
         refresh: 'mock-refresh-' + username,
         must_change_password: profile.must_change_password,
+        real_name: profile.real_name,
         role_codes: profile.role_codes,
       }
     },
@@ -26,10 +27,12 @@ export default [
     url: '/api/auth/me/',
     method: 'get',
     response: () => ({
+      id: 1,
       username: 'demo',
-      name: '演示用户',
+      real_name: '演示用户',
+      phone: '',
+      user_status: 'ACTIVE',
       role_codes: ['ADMIN'],
-      must_change_password: false,
     }),
   },
   {

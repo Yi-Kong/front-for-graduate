@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>操作日志 · 设计稿 v1（山西能源学院）</title>
+<style>
+  :root {
+    --brand: #C0202E;        /* 山能红 */
+    --brand-deep: #A81B28;
+    --brand-dark: #8F1822;
+    --brand-soft: #fdecee;
+    --gold: #E3B23C;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: #eef0f3;
+    min-height: 100vh;
+  }
+
+  /* 设计稿预览用：角色切换条 */
+  .role-bar {
+    position: sticky; top: 0; z-index: 60;
+    background: #111827; color: #e5e7eb;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; font-size: 12.5px;
+  }
+  .role-bar .lbl { opacity: .75; letter-spacing: .5px; }
+  .role-bar button {
+    border: 1px solid #374151; background: transparent; color: #d1d5db;
+    font-size: 12.5px; padding: 4px 14px; border-radius: 999px; cursor: pointer;
+    transition: all .15s;
+  }
+  .role-bar button:hover { border-color: #6b7280; }
+  .role-bar button.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+  .role-bar .tip { margin-left: auto; opacity: .55; font-size: 11.5px; }
+
+  .shell { display: flex; min-height: calc(100vh - 37px); }
+
+  /* ---------- 左侧应用外壳侧边栏 ---------- */
+  .sidebar {
+    width: 248px; flex: none; background: #fff;
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    position: sticky; top: 37px; height: calc(100vh - 37px);
+  }
+  .brand-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 18px 16px; border-bottom: 1px solid var(--line);
+  }
+  .brand-head .emblem { width: 30px; height: 30px; border-radius: 50%; background: #fff; object-fit: contain; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .brand-head .cn { font-size: 15px; font-weight: 700; letter-spacing: .5px; line-height: 1.2; }
+  .brand-head .en { font-size: 10px; color: var(--muted); letter-spacing: .5px; margin-top: 2px; }
+
+  .nav { flex: 1; overflow-y: auto; padding: 14px 12px; }
+  .group-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; padding: 12px 12px 6px; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 3px;
+    font-size: 14px; color: #374151; text-decoration: none; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .nav-item:hover { background: #f3f4f6; }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; }
+  .nav-item .ico { width: 18px; height: 18px; flex: none; }
+
+  .user-foot {
+    border-top: 1px solid var(--line); padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-foot .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+  .user-foot .meta { flex: 1; min-width: 0; }
+  .user-foot .name { font-size: 13.5px; font-weight: 600; }
+  .user-foot .role { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .user-foot .logout {
+    border: none; background: #f3f4f6; color: var(--muted); cursor: pointer;
+    width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s;
+  }
+  .user-foot .logout:hover { background: var(--brand-soft); color: var(--brand); }
+
+  /* ---------- 右侧主区 ---------- */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 56px; flex: none; background: #fff; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  }
+  .topbar .crumb { font-size: 13px; color: var(--muted); }
+  .topbar .crumb b { color: var(--ink); font-weight: 600; }
+  .year-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: var(--brand-dark);
+    background: var(--brand-soft); border: 1px solid #f6d3d7; border-radius: 999px; padding: 5px 13px;
+  }
+  .year-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+
+  .content { padding: 26px 28px 36px; flex: 1; }
+  .page-head { margin-bottom: 18px; }
+  .page-head h1 { font-size: 24px; font-weight: 700; letter-spacing: .5px; }
+  .page-head p { font-size: 13.5px; color: var(--muted); margin-top: 6px; max-width: 760px; line-height: 1.6; }
+
+  /* 按钮（山能红） */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 38px; padding: 0 16px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: 1px solid transparent; transition: background .15s, color .15s, border-color .15s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { background: #f9fafb; border-color: #d1d5db; }
+
+  .hidden { display: none !important; }
+
+  /* ---------- 筛选工具栏 ---------- */
+  .toolbar {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; margin-bottom: 16px;
+    display: flex; flex-wrap: wrap; gap: 14px 16px; align-items: flex-end;
+  }
+  .filt { display: flex; flex-direction: column; gap: 6px; }
+  .filt label { font-size: 12.5px; font-weight: 600; color: #4b5563; }
+  .input, .select {
+    height: 40px; border: 1px solid var(--line); border-radius: 10px;
+    padding: 0 12px; font-size: 13.5px; color: var(--ink); background: #fff; font-family: inherit;
+    transition: border-color .15s, box-shadow .15s; min-width: 150px;
+  }
+  .input:focus, .select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(192,32,46,.10); }
+  .filt.actions { margin-left: auto; display: flex; gap: 10px; padding-bottom: 1px; }
+
+  /* ---------- 表格 ---------- */
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 860px; }
+  thead th {
+    text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted);
+    background: #f9fafb; padding: 12px 18px; border-bottom: 1px solid var(--line);
+    letter-spacing: .3px; white-space: nowrap;
+  }
+  tbody td {
+    font-size: 13.5px; padding: 14px 18px; border-bottom: 1px solid #f3f4f6; vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fcfcfd; }
+  .op-time { font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+  .op-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .op-detail { color: #4b5563; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; color: #6b7280; }
+
+  /* 操作类型 pill */
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 11px; border-radius: 999px; white-space: nowrap; }
+  .pill.login   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .pill.create  { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .pill.update  { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .pill.delete  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .pill.import  { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+  .pill.other   { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+  .acts { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .act {
+    display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+    height: 30px; padding: 0 12px; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: var(--brand);
+    font-size: 13px; font-weight: 600; line-height: 1; cursor: pointer; font-family: inherit;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .act:hover { background: var(--brand-soft); border-color: #f6d3d7; }
+
+  /* ---------- 分页 ---------- */
+  .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .pager .total { font-size: 13px; color: var(--muted); }
+  .pager .pages { display: flex; gap: 6px; align-items: center; }
+  .pg {
+    min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: #4b5563;
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .pg:hover { background: #f9fafb; border-color: #d1d5db; }
+  .pg.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .pg:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* 空态 */
+  .empty { border: 1px dashed #d1d5db; border-radius: 12px; padding: 40px 20px; text-align: center; color: var(--muted); background: #fafafa; }
+  .empty .ic { width: 30px; height: 30px; color: #cbd5e1; margin: 0 auto 10px; }
+  .empty .t { font-size: 14px; font-weight: 600; color: #4b5563; }
+  .empty .s { font-size: 12.5px; margin-top: 5px; }
+
+  .note {
+    margin-top: 20px; display: flex; gap: 10px; align-items: flex-start;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 12px 14px; font-size: 12.5px; color: #92400e; line-height: 1.7;
+  }
+  .note svg { flex: none; margin-top: 1px; }
+  .note code { background: #fef3c7; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  /* ---------- 详情抽屉 ---------- */
+  .drawer-mask { position: fixed; inset: 0; background: rgba(17,24,39,.45); z-index: 80; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 440px; max-width: 100vw;
+    background: #fff; z-index: 81; box-shadow: -12px 0 40px rgba(0,0,0,.18);
+    display: flex; flex-direction: column;
+  }
+  .drawer-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .drawer-head h3 { font-size: 17px; font-weight: 700; }
+  .drawer-head .x { border: none; background: #f3f4f6; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; }
+  .drawer-head .x:hover { background: #e5e7eb; }
+  .drawer-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+  .kv { padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { font-size: 12.5px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+  .kv .v { font-size: 14px; color: var(--ink); line-height: 1.6; word-break: break-all; }
+  .kv .v.mono { font-size: 13px; }
+
+  /* ---------- 响应式 ---------- */
+  .hamburger { display: none; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; flex: none; }
+  .hamburger:hover { background: #f9fafb; }
+  .scrim { display: none; }
+
+  @media (max-width: 768px) {
+    .sidebar { position: fixed; left: 0; top: 37px; bottom: 0; z-index: 70; transform: translateX(-100%); transition: transform .25s ease; box-shadow: 2px 0 16px rgba(0,0,0,.15); }
+    .sidebar.open { transform: translateX(0); }
+    .hamburger { display: inline-flex; }
+    .scrim.show { display: block; position: fixed; inset: 37px 0 0 0; background: rgba(17,24,39,.4); z-index: 65; }
+    .topbar { padding: 0 14px; }
+    .content { padding: 18px 14px 28px; }
+    .page-head h1 { font-size: 21px; }
+    .toolbar { padding: 14px; gap: 12px; }
+    .filt { flex: 1 1 100%; }
+    .input, .select { width: 100%; min-width: 0; }
+    .filt.actions { margin-left: 0; width: 100%; }
+    .filt.actions .btn { flex: 1; justify-content: center; }
+    .card { border-radius: 12px; }
+    thead th, tbody td { padding: 12px 14px; }
+    .op-detail { max-width: 180px; }
+    .drawer { width: 100vw; }
+  }
+  @media (max-width: 560px) {
+    table, thead, tbody, tr, td { display: block; width: 100% !important; }
+    thead { display: none; }
+    .card { overflow: visible; border: none; background: transparent; }
+    tr { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 4px 14px; background: #fff; }
+    td { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #f3f4f6; }
+    td:last-child { border-bottom: none; }
+    td::before { content: attr(data-label); font-size: 12.5px; color: var(--muted); font-weight: 600; flex: none; }
+    .acts { justify-content: flex-end; }
+    .op-detail { max-width: none; text-align: right; }
+  }
+</style>
+</head>
+<body>
+  <!-- 设计稿预览切换条（实际系统按登录 role_codes 自动渲染，无此条） -->
+  <div class="role-bar">
+    <span class="lbl">设计稿预览 · 切换角色查看菜单差异：</span>
+    <button id="btn-admin" class="on" onclick="setRole('admin')">管理员</button>
+    <button id="btn-teacher" onclick="setRole('teacher')">教师</button>
+    <button id="btn-student" onclick="setRole('student')">学生</button>
+    <span class="tip">实际实现：菜单组按登录返回的 role_codes 过滤，无此切换条</span>
+  </div>
+
+  <div class="shell">
+    <!-- ===== 应用外壳：侧边栏（按 role_codes 过滤） ===== -->
+    <aside class="sidebar">
+      <div class="brand-head">
+        <img class="emblem" src="school-logo.png" alt="校徽" />
+        <div>
+          <div class="cn">毕业设计综合管理系统</div>
+          <div class="en">SHANXI INSTITUTE OF ENERGY</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="group-label">通用</div>
+        <a class="nav-item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
+          工作台
+        </a>
+
+        <!-- 仅 ADMIN 可见 -->
+        <div id="grp-admin">
+          <div class="group-label">管理员</div>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            届次管理
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 3v12M12 15v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8 7h8M8 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            师生批量导入
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/></svg>
+            题目审核
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            选题轮次管理
+          </a>
+          <a class="nav-item active">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M5 5h14v14H5z" stroke="currentColor" stroke-width="1.7"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            操作日志
+          </a>
+        </div>
+
+        <!-- 仅 TEACHER 可见 -->
+        <div id="grp-teacher" class="hidden">
+          <div class="group-label">教师</div>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 19V5a1 1 0 0 1 1-1h9l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 4v5h5" stroke="currentColor" stroke-width="1.7"/></svg>
+            我的题目申报
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="16" cy="10" r="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M14 19c0-2 1.6-3.6 3.6-3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            我的指导情况
+          </a>
+        </div>
+
+        <!-- 仅 STUDENT 可见 -->
+        <div id="grp-student" class="hidden">
+          <div class="group-label">学生</div>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            题目浏览
+          </a>
+          <a class="nav-item">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M5 12.5 10 17l9-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            我的选题
+          </a>
+        </div>
+      </nav>
+
+      <div class="user-foot">
+        <div class="avatar" id="u-avatar">管</div>
+        <div class="meta">
+          <div class="name" id="u-name">王管理员</div>
+          <div class="role" id="u-role">管理员 · ADMIN</div>
+        </div>
+        <button class="logout" title="退出登录">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===== 主区：操作日志（#10） ===== -->
+    <main class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <button class="hamburger" onclick="toggleSidebar()" aria-label="打开菜单">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <div class="crumb">毕业设计综合管理系统 / <b>操作日志</b></div>
+        </div>
+        <span class="year-badge"><span class="dot"></span> 当前届次：2026 届</span>
+      </header>
+
+      <div class="content">
+        <div class="page-head">
+          <h1>操作日志</h1>
+          <p>记录全系统关键操作（登录、届次变更、题目审核、师生导入等）的留痕，供管理员审计追溯。仅管理员可见。</p>
+        </div>
+
+        <!-- 筛选工具栏 -->
+        <div class="toolbar">
+          <div class="filt">
+            <label>操作人</label>
+            <input class="input" placeholder="姓名 / 账号" />
+          </div>
+          <div class="filt">
+            <label>操作类型</label>
+            <select class="select">
+              <option>全部类型</option>
+              <option>登录 / 登出</option>
+              <option>创建</option>
+              <option>更新 / 编辑</option>
+              <option>删除</option>
+              <option>导入</option>
+            </select>
+          </div>
+          <div class="filt">
+            <label>时间范围</label>
+            <select class="select">
+              <option>全部时间</option>
+              <option>近 7 天</option>
+              <option>近 30 天</option>
+              <option>自定义</option>
+            </select>
+          </div>
+          <div class="filt" style="flex:1 1 220px; min-width:200px">
+            <label>关键词</label>
+            <input class="input" placeholder="搜索操作对象 / 详情" />
+          </div>
+          <div class="filt actions">
+            <button class="btn btn-ghost">重置</button>
+            <button class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              查询
+            </button>
+          </div>
+        </div>
+
+        <!-- 日志列表 -->
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:18%">操作时间</th>
+                <th style="width:14%">操作人</th>
+                <th style="width:12%">类型</th>
+                <th style="width:16%">操作对象</th>
+                <th style="width:28%">详情</th>
+                <th style="width:12%">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="操作时间"><div class="op-time">2026-09-29 14:32:08</div><div class="op-sub">IP 10.12.3.21</div></td>
+                <td data-label="操作人">王管理员<div class="op-sub">admin</div></td>
+                <td data-label="类型"><span class="pill import">导入</span></td>
+                <td data-label="操作对象">学生导入批次 #B-118</td>
+                <td data-label="详情" class="op-detail">提交 312 条学生记录，成功 308 条，失败 4 条</td>
+                <td data-label="操作"><div class="acts"><button class="act" onclick="openDrawer()">详情</button></div></td>
+              </tr>
+              <tr>
+                <td data-label="操作时间"><div class="op-time">2026-09-29 11:05:41</div><div class="op-sub">IP 10.12.3.21</div></td>
+                <td data-label="操作人">王管理员<div class="op-sub">admin</div></td>
+                <td data-label="类型"><span class="pill create">创建</span></td>
+                <td data-label="操作对象">届次 / 2027 届</td>
+                <td data-label="详情" class="op-detail">新增届次「2027 届」，学年范围 2026–2027</td>
+                <td data-label="操作"><div class="acts"><button class="act" onclick="openDrawer()">详情</button></div></td>
+              </tr>
+              <tr>
+                <td data-label="操作时间"><div class="op-time">2026-09-28 16:47:12</div><div class="op-sub">IP 10.12.3.55</div></td>
+                <td data-label="操作人">李老师<div class="op-sub">teacher_li</div></td>
+                <td data-label="类型"><span class="pill update">更新</span></td>
+                <td data-label="操作对象">题目 / #T-2041</td>
+                <td data-label="详情" class="op-detail">修改题名为「基于 LSTM 的电力负荷预测」，生成版本记录 v2</td>
+                <td data-label="操作"><div class="acts"><button class="act" onclick="openDrawer()">详情</button></div></td>
+              </tr>
+              <tr>
+                <td data-label="操作时间"><div class="op-time">2026-09-28 09:18:30</div><div class="op-sub">IP 10.12.3.55</div></td>
+                <td data-label="操作人">李老师<div class="op-sub">teacher_li</div></td>
+                <td data-label="类型"><span class="pill login">登录</span></td>
+                <td data-label="操作对象">—</td>
+                <td data-label="详情" class="op-detail">账号登录系统</td>
+                <td data-label="操作"><div class="acts"><button class="act" onclick="openDrawer()">详情</button></div></td>
+              </tr>
+              <tr>
+                <td data-label="操作时间"><div class="op-time">2026-09-27 15:02:53</div><div class="op-sub">IP 10.12.3.21</div></td>
+                <td data-label="操作人">王管理员<div class="op-sub">admin</div></td>
+                <td data-label="类型"><span class="pill delete">删除</span></td>
+                <td data-label="操作对象">届次 / 2024 届</td>
+                <td data-label="详情" class="op-detail">删除历史届次「2024 届」及其关联数据</td>
+                <td data-label="操作"><div class="acts"><button class="act" onclick="openDrawer()">详情</button></div></td>
+              </tr>
+              <tr>
+                <td data-label="操作时间"><div class="op-time">2026-09-27 10:36:44</div><div class="op-sub">IP 10.12.3.40</div></td>
+                <td data-label="操作人">张老师<div class="op-sub">teacher_zhang</div></td>
+                <td data-label="类型"><span class="pill create">创建</span></td>
+                <td data-label="操作对象">题目 / #T-2039</td>
+                <td data-label="详情" class="op-detail">申报题目「校园能耗监测平台设计」，自动查重：无重复</td>
+                <td data-label="操作"><div class="acts"><button class="act" onclick="openDrawer()">详情</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pager">
+          <div class="total">共 1,286 条 · 每页 20 条</div>
+          <div class="pages">
+            <button class="pg" disabled>上一页</button>
+            <button class="pg active">1</button>
+            <button class="pg">2</button>
+            <button class="pg">3</button>
+            <button class="pg">…</button>
+            <button class="pg">65</button>
+            <button class="pg">下一页</button>
+          </div>
+        </div>
+
+        <div class="note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d97706" stroke-width="1.7"/><path d="M12 7v6M12 16.5v.5" stroke="#d97706" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span><b>后端约定（待确认）：</b>① 列表走 <code>GET /api/operation-logs/</code>（IsAdmin），详情走 <code>GET /api/operation-logs/{id}/</code>；② <b>后端文档未给出日志序列化器字段</b>，本稿列（操作人 / 类型 / 操作对象 / 详情 / IP / 时间）为按审计日志惯例的<b>合理假设</b>，落地前须与真实 <code>OperationLog</code> 序列化器字段对齐；③ 筛选条件（操作人 / 类型 / 时间 / 关键词）是否为后端支持的 query 参数、枚举值如何，需确认后再对接；④ 列表为只读、无写操作，无需二次确认类危险操作。</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 移动端抽屉遮罩 -->
+  <div class="scrim" id="scrim" onclick="toggleSidebar()"></div>
+
+  <!-- ===== 日志详情 抽屉（默认隐藏，点「详情」打开） ===== -->
+  <div class="drawer-mask hidden" id="drawer-mask" onclick="closeDrawer()"></div>
+  <div class="drawer hidden" id="drawer">
+    <div class="drawer-head">
+      <h3>操作日志详情</h3>
+      <button class="x" onclick="closeDrawer()" title="关闭">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="kv"><div class="k">日志编号</div><div class="v mono">LOG-20260929-001482</div></div>
+      <div class="kv"><div class="k">操作人</div><div class="v">王管理员（admin）</div></div>
+      <div class="kv"><div class="k">操作类型</div><div class="v"><span class="pill import">导入</span></div></div>
+      <div class="kv"><div class="k">操作对象</div><div class="v">学生导入批次 #B-118</div></div>
+      <div class="kv"><div class="k">详情</div><div class="v">提交 312 条学生记录，成功 308 条，失败 4 条；失败明细见批次错误列表。</div></div>
+      <div class="kv"><div class="k">IP 地址</div><div class="v mono">10.12.3.21</div></div>
+      <div class="kv"><div class="k">用户代理</div><div class="v mono">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) …</div></div>
+      <div class="kv"><div class="k">操作时间</div><div class="v mono">2026-09-29 14:32:08</div></div>
+    </div>
+  </div>
+
+  <script>
+    var ROLES = {
+      admin:   { grp: 'grp-admin',   avatar: '管', name: '王管理员', role: '管理员 · ADMIN' },
+      teacher: { grp: 'grp-teacher', avatar: '李', name: '李老师',   role: '教师 · TEACHER' },
+      teacher2:{ grp: 'grp-teacher', avatar: '张', name: '张老师',   role: '教师 · TEACHER' },
+      student: { grp: 'grp-student', avatar: '张', name: '张同学',   role: '学生 · STUDENT' }
+    };
+    function setRole(r) {
+      ['admin','teacher','student'].forEach(function(k){
+        document.getElementById('grp-' + k).classList.toggle('hidden', k !== r);
+        document.getElementById('btn-' + k).classList.toggle('on', k === r);
+      });
+      var c = ROLES[r] || ROLES.admin;
+      document.getElementById('u-avatar').textContent = c.avatar;
+      document.getElementById('u-name').textContent = c.name;
+      document.getElementById('u-role').textContent = c.role;
+      // 操作日志仅 ADMIN 可见，非管理员隐藏主区内容并提示
+      var content = document.querySelector('.content');
+      if (r !== 'admin') {
+        content.innerHTML = '<div class="page-head"><div><h1>无访问权限</h1><p>操作日志仅对管理员开放。请联系系统管理员或使用管理员账号登录。</p></div></div>';
+      }
+    }
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.getElementById('scrim').classList.toggle('show');
+    }
+    document.querySelector('.nav').addEventListener('click', function(){
+      if (window.innerWidth <= 768) toggleSidebar();
+    });
+    function openDrawer() {
+      document.getElementById('drawer-mask').classList.remove('hidden');
+      document.getElementById('drawer').classList.remove('hidden');
+    }
+    function closeDrawer() {
+      document.getElementById('drawer-mask').classList.add('hidden');
+      document.getElementById('drawer').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

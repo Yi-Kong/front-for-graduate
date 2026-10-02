@@ -144,8 +144,8 @@ function yearBadge(name) {
                 <div class="mt-0.5 text-[12.5px] text-gray-400">{{ y.is_current ? '本届毕业设计正在推进中' : '已结束' }}</div>
               </div>
             </td>
-            <td data-label="学年范围" class="px-5 py-3.5 text-[14px] text-gray-700">{{ y.start_year }} – {{ y.end_year }}</td>
-            <td data-label="创建时间" class="px-5 py-3.5 text-[14px] text-gray-700">{{ y.created_at }}</td>
+            <td data-label="学年范围" class="px-5 py-3.5 text-[14px] text-gray-700">{{ y.start_date }} – {{ y.end_date }}</td>
+            <td data-label="创建时间" class="px-5 py-3.5 text-[14px] text-gray-700">—</td>
             <td data-label="状态" class="px-5 py-3.5">
               <span v-if="y.is_current" class="inline-flex items-center rounded-full border border-[#f6d3d7] bg-[#fdecee] px-2.5 py-1 text-[12px] font-semibold text-[#8F1822]">当前届次</span>
               <span v-else class="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-[12px] font-semibold text-gray-500">历史届次</span>

@@ -9,17 +9,13 @@ export default [
     method: 'get',
     response: () => ({
       academic_year: currentAcademicYear(),
-      stage: {
-        name: '题目申报与查重',
-        deadline: '2026-03-15T23:59:00',
-        status: 'live',
-      },
+      current_stage: '题目申报与查重',
       timeline: [
-        { name: '届次与师生准备', start: '2025-09-01', end: '2025-12-31', status: 'done' },
-        { name: '题目申报与查重', start: '2026-01-01', end: '2026-03-15', status: 'live' },
-        { name: '题目审核与发布', start: '2026-03-16', end: '2026-04-10', status: 'wait' },
-        { name: '第一轮选题', start: '2026-04-11', end: '2026-04-25', status: 'wait' },
-        { name: '第二轮选题', start: '2026-04-26', end: '2026-05-10', status: 'wait' },
+        { stage_code: 'PREPARE', display_name: '届次与师生准备', start_time: '2025-09-01', deadline: '2025-12-31', overdue: true },
+        { stage_code: 'DECLARATION', display_name: '题目申报与查重', start_time: '2026-01-01', deadline: '2026-03-15', overdue: true },
+        { stage_code: 'REVIEW', display_name: '题目审核与发布', start_time: '2026-03-16', deadline: '2026-04-10', overdue: false },
+        { stage_code: 'SELECTION1', display_name: '第一轮选题', start_time: '2026-04-11', deadline: '2026-04-25', overdue: false },
+        { stage_code: 'SELECTION2', display_name: '第二轮选题', start_time: '2026-04-26', deadline: '2026-05-10', overdue: false },
       ],
       todos: { count: 0 },
     }),
