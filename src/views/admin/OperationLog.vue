@@ -1,66 +1,22 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { getOperationLogs } from '@/api/audit'
+import { actionMeta, logSnapshot } from '@/utils/operationLog'
+import OperationLogFilters from '@/components/admin/OperationLogFilters.vue'
+import OperationLogDetailDrawer from '@/components/admin/OperationLogDetailDrawer.vue'
 
 const PAGE_SIZE = 20
 
-// 操作类型 → 展示文案 + pill 配色（对齐文档大写枚举）
-const ACTION_META = {
-  LOGIN: { label: '登录', pill: 'bg-[#eff6ff] text-[#1d4ed8] border-[#bfdbfe]' },
-  CREATE: { label: '创建', pill: 'bg-[#ecfdf5] text-[#047857] border-[#a7f3d0]' },
-  UPDATE: { label: '更新', pill: 'bg-[#fffbeb] text-[#b45309] border-[#fde68a]' },
-  DELETE: { label: '删除', pill: 'bg-[#fef2f2] text-[#b91c1c] border-[#fecaca]' },
-  IMPORT: { label: '导入', pill: 'bg-[#f5f3ff] text-[#6d28d9] border-[#ddd6fe]' },
-  REVIEW: { label: '审核', pill: 'bg-[#ecfeff] text-[#0e7490] border-[#a5f3fc]' },
-  EXPORT: { label: '导出', pill: 'bg-[#f0fdf4] text-[#15803d] border-[#bbf7d0]' },
-  SELECTION: { label: '选题', pill: 'bg-[#fdf4ff] text-[#a21caf] border-[#f5d0fe]' },
-}
-function actionMeta(a) {
-  return ACTION_META[a] || { label: a, pill: 'bg-gray-100 text-gray-500 border-gray-200' }
-}
-// 详情列展示 before_data / after_data 的 JSON 快照
-function logSnapshot(log) {
-  const d = log?.after_data || log?.before_data
-  return d ? JSON.stringify(d) : '—'
-}
-
-// —— 筛选 ——
-const filters = reactive({ operator: '', action: '', range: '', keyword: '' })
+// —— 列表查询（DRF 分页结构 {count,next,previous,results}）——
 const applied = ref({})
 const page = ref(1)
 
-function pad(n) {
-  return String(n).padStart(2, '0')
-}
-function rangeToDates(range) {
-  if (!range) return {}
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 0
-  if (!days) return {}
-  const to = new Date()
-  const from = new Date(to.getTime() - days * 86400000)
-  const fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-  return { date_from: fmt(from), date_to: fmt(to) }
-}
-function onSearch() {
+function onSearch(payload) {
   page.value = 1
-  applied.value = {
-    operator: filters.operator.trim(),
-    action: filters.action,
-    search: filters.keyword.trim(),
-    ...rangeToDates(filters.range),
-  }
-}
-function onReset() {
-  filters.operator = ''
-  filters.action = ''
-  filters.range = ''
-  filters.keyword = ''
-  page.value = 1
-  applied.value = {}
+  applied.value = payload
 }
 
-// —— 列表查询（DRF 分页结构 {count,next,previous,results}）——
 const { data, isLoading, isError, error } = useQuery({
   queryKey: ['operation-logs', 'list', applied, page],
   queryFn: () => getOperationLogs({ ...applied.value, page: page.value }),
@@ -104,45 +60,7 @@ function closeDetail() {
     </div>
 
     <!-- 筛选工具栏 -->
-    <div class="mb-4 flex flex-wrap items-end gap-4 rounded-2xl border border-gray-200 bg-white p-4">
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[12.5px] font-semibold text-gray-600">操作人</label>
-        <input v-model="filters.operator" class="h-10 w-[160px] rounded-[10px] border border-gray-200 px-3 text-[13.5px] text-gray-800 outline-none transition focus:border-[#C0202E] focus:ring-[3px] focus:ring-[#C0202E]/10" placeholder="姓名 / 账号" />
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[12.5px] font-semibold text-gray-600">操作类型</label>
-        <select v-model="filters.action" class="h-10 w-[150px] rounded-[10px] border border-gray-200 bg-white px-3 text-[13.5px] text-gray-800 outline-none transition focus:border-[#C0202E] focus:ring-[3px] focus:ring-[#C0202E]/10">
-          <option value="">全部类型</option>
-          <option value="LOGIN">登录</option>
-          <option value="CREATE">创建</option>
-          <option value="UPDATE">更新 / 编辑</option>
-          <option value="DELETE">删除</option>
-          <option value="IMPORT">导入</option>
-          <option value="REVIEW">审核</option>
-          <option value="EXPORT">导出</option>
-          <option value="SELECTION">选题</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[12.5px] font-semibold text-gray-600">时间范围</label>
-        <select v-model="filters.range" class="h-10 w-[150px] rounded-[10px] border border-gray-200 bg-white px-3 text-[13.5px] text-gray-800 outline-none transition focus:border-[#C0202E] focus:ring-[3px] focus:ring-[#C0202E]/10">
-          <option value="">全部时间</option>
-          <option value="7d">近 7 天</option>
-          <option value="30d">近 30 天</option>
-        </select>
-      </div>
-      <div class="flex flex-1 flex-col gap-1.5" style="min-width: 200px">
-        <label class="text-[12.5px] font-semibold text-gray-600">关键词</label>
-        <input v-model="filters.keyword" class="h-10 w-full rounded-[10px] border border-gray-200 px-3 text-[13.5px] text-gray-800 outline-none transition focus:border-[#C0202E] focus:ring-[3px] focus:ring-[#C0202E]/10" placeholder="搜索操作对象 / 详情" />
-      </div>
-      <div class="flex gap-2.5">
-        <button class="h-10 rounded-[10px] border border-gray-200 bg-white px-4 text-[14px] font-semibold text-gray-700 transition hover:bg-gray-50" @click="onReset">重置</button>
-        <button class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#C0202E] px-4 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px" @click="onSearch">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          查询
-        </button>
-      </div>
-    </div>
+    <OperationLogFilters @search="onSearch" />
 
     <!-- 加载 / 错误 / 空态 -->
     <div v-if="isLoading" class="rounded-2xl border border-gray-200 bg-white p-12 text-center text-[13.5px] text-gray-400">加载中…</div>
@@ -200,26 +118,7 @@ function closeDetail() {
     </div>
 
     <!-- 详情抽屉 -->
-    <div v-if="drawerOpen" class="fixed inset-0 z-[80]">
-      <div class="absolute inset-0 bg-black/40" @click="closeDetail"></div>
-      <div class="absolute right-0 top-0 flex h-full w-[440px] max-w-full flex-col bg-white shadow-[-12px_0_40px_rgba(0,0,0,.18)]">
-        <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h3 class="text-[17px] font-bold">操作日志详情</h3>
-          <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition hover:bg-gray-200" @click="closeDetail">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-        <div v-if="selected" class="flex-1 overflow-y-auto px-5 py-4">
-          <div class="kv"><div class="k">操作人</div><div class="v">{{ selected.operator_name }}</div></div>
-          <div class="kv"><div class="k">操作类型</div><div class="v"><span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[12px] font-semibold" :class="actionMeta(selected.operation_type).pill">{{ actionMeta(selected.operation_type).label }}</span></div></div>
-          <div class="kv"><div class="k">操作对象</div><div class="v">{{ selected.target_type && selected.target_type !== '—' ? selected.target_type + ' / ' + selected.target_id : '—' }}</div></div>
-          <div class="kv"><div class="k">变更前</div><div class="v break-all font-mono text-[12.5px]">{{ selected.before_data ? JSON.stringify(selected.before_data) : '—' }}</div></div>
-          <div class="kv"><div class="k">变更后</div><div class="v break-all font-mono text-[12.5px]">{{ selected.after_data ? JSON.stringify(selected.after_data) : '—' }}</div></div>
-          <div class="kv"><div class="k">IP 地址</div><div class="v font-mono">{{ selected.ip_address }}</div></div>
-          <div class="kv"><div class="k">操作时间</div><div class="v font-mono">{{ selected.created_at }}</div></div>
-        </div>
-      </div>
-    </div>
+    <OperationLogDetailDrawer v-if="drawerOpen" :log="selected" @close="closeDetail" />
   </div>
 </template>
 
@@ -270,25 +169,6 @@ function closeDetail() {
   background: #c0202e;
   border-color: #c0202e;
   color: #fff;
-}
-.kv {
-  padding: 14px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-.kv:last-child {
-  border-bottom: none;
-}
-.kv .k {
-  margin-bottom: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #6b7280;
-}
-.kv .v {
-  font-size: 14px;
-  color: #1f2937;
-  line-height: 1.6;
-  word-break: break-all;
 }
 
 /* 超窄屏（≤560px）：表格转为卡片列表，避免横向滚动 */
