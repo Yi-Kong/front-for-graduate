@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>我的题目申报（教师）· 设计稿 v1（山西能源学院）</title>
+<style>
+  :root {
+    --brand: #C0202E;       /* 山能红 */
+    --brand-deep: #A81B28;
+    --brand-dark: #8F1822;
+    --brand-soft: #fdecee;
+    --brand-line: #f6d3d7;
+    --gold: #E3B23C;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--ink); background: #eef0f3; min-height: 100vh;
+  }
+
+  /* 设计稿预览用切换条 */
+  .view-bar {
+    position: sticky; top: 0; z-index: 90;
+    background: #111827; color: #e5e7eb;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; font-size: 12.5px;
+  }
+  .view-bar .lbl { opacity: .75; letter-spacing: .5px; }
+  .view-bar button {
+    border: 1px solid #374151; background: transparent; color: #d1d5db;
+    font-size: 12.5px; padding: 4px 14px; border-radius: 999px; cursor: pointer; transition: all .15s;
+  }
+  .view-bar button:hover { border-color: #6b7280; }
+  .view-bar button.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+  .view-bar .tip { margin-left: auto; opacity: .55; font-size: 11.5px; }
+
+  .shell { display: flex; min-height: calc(100vh - 37px); }
+
+  /* 侧边栏 */
+  .sidebar {
+    width: 248px; flex: none; background: #fff; border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; position: sticky; top: 37px; height: calc(100vh - 37px);
+  }
+  .brand-head { display: flex; align-items: center; gap: 12px; padding: 18px 18px 16px; border-bottom: 1px solid var(--line); }
+  .brand-head .emblem { width: 30px; height: 30px; border-radius: 50%; background: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 1px 3px rgba(0,0,0,.12); color: var(--brand); font-weight:800; font-size:14px; }
+  .brand-head .cn { font-size: 15px; font-weight: 700; letter-spacing: .5px; line-height: 1.2; }
+  .brand-head .en { font-size: 10px; color: var(--muted); letter-spacing: .5px; margin-top: 2px; }
+  .nav { flex: 1; overflow-y: auto; padding: 14px 12px; }
+  .group-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; padding: 12px 12px 6px; font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; margin-bottom: 3px; font-size: 14px; color: #374151; text-decoration: none; cursor: pointer; transition: background .15s, color .15s; }
+  .nav-item:hover { background: #f3f4f6; }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; }
+  .nav-item .ico { width: 18px; height: 18px; flex: none; }
+  .user-foot { border-top: 1px solid var(--line); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .user-foot .avatar { width: 34px; height: 34px; border-radius: 50%; flex: none; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .user-foot .meta { flex: 1; min-width: 0; }
+  .user-foot .name { font-size: 13.5px; font-weight: 600; }
+  .user-foot .role { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+
+  /* 主区 */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { height: 56px; flex: none; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .topbar .crumb { font-size: 13px; color: var(--muted); }
+  .topbar .crumb b { color: var(--ink); font-weight: 600; }
+  .year-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--brand-dark); background: var(--brand-soft); border: 1px solid var(--brand-line); border-radius: 999px; padding: 5px 13px; }
+  .year-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+  .content { padding: 26px 28px 36px; flex: 1; }
+
+  /* 列表视图 */
+  .page-head { margin-bottom: 20px; }
+  .page-head h1 { font-size: 24px; font-weight: 700; letter-spacing: .5px; }
+  .page-head p { font-size: 13.5px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+
+  .toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; margin-bottom: 16px; }
+  .seg { display: inline-flex; background: #f3f4f6; border-radius: 10px; padding: 3px; gap: 2px; }
+  .seg button { border: none; background: transparent; font-size: 13.5px; font-weight: 600; color: var(--muted); padding: 7px 13px; border-radius: 8px; cursor: pointer; transition: all .15s; }
+  .seg button.on { background: #fff; color: var(--brand-dark); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12.5px; font-weight: 600; color: #374151; }
+  .field input, .field select { height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 14px; font-size: 14px; outline: none; transition: border .15s, box-shadow .15s; }
+  .field input:focus, .field select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(192,32,46,.1); }
+  .spacer { margin-left: auto; }
+  .btn { height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--line); background: #fff; color: #374151; transition: background .15s, border-color .15s, color .15s, transform .05s; }
+  .btn:hover { background: #f9fafb; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.primary:hover { background: var(--brand-deep); }
+
+  .table { width: 100%; border-collapse: collapse; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; }
+  .table th { text-align: left; font-size: 12.5px; font-weight: 600; color: #6b7280; background: #f9fafb; padding: 13px 20px; border-bottom: 1px solid var(--line); }
+  .table td { padding: 14px 20px; border-bottom: 1px solid #f3f4f6; font-size: 14px; vertical-align: middle; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: #fafafa; }
+  .t-title { font-weight: 600; color: #111827; }
+  .t-sub { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 11px; border-radius: 999px; }
+  .b-gray { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+  .b-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .b-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .b-green { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .b-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .b-purple { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+
+  .acts { display: inline-flex; gap: 6px; flex-wrap: nowrap; }
+  .act { height: 30px; min-width: 58px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: #4b5563; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; }
+  .act:hover { background: #f9fafb; border-color: #d1d5db; color: #1f2937; }
+  .act.primary { color: var(--brand-dark); background: var(--brand-soft); border-color: var(--brand-line); }
+  .act.primary:hover { background: #fbdde0; color: var(--brand-dark); }
+  .act.danger { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+  .act.danger:hover { background: #fee2e2; }
+
+  .pager { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .pager .pg { min-width: 34px; height: 34px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-weight: 600; cursor: pointer; }
+  .pager .pg:disabled { opacity: .45; cursor: not-allowed; }
+
+  .empty { border: 1px dashed #d1d5db; border-radius: 16px; padding: 44px 20px; text-align: center; color: var(--muted); background: #fafafa; }
+  .empty .t { font-size: 15px; font-weight: 600; color: #4b5563; }
+  .empty .s { font-size: 13px; margin-top: 6px; }
+
+  .note { margin-top: 18px; display: flex; gap: 10px; align-items: flex-start; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; color: #92400e; line-height: 1.65; }
+  .note b { color: #78350f; }
+
+  /* 覆盖层（弹窗/抽屉） */
+  .overlay { position: fixed; inset: 0; background: rgba(17,24,39,.4); z-index: 80; display: none; }
+  .overlay.show { display: block; }
+  .modal { position: fixed; z-index: 85; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 560px; max-width: calc(100vw - 32px); background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); display: none; }
+  .modal.show { display: block; }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+  .modal-head h3 { font-size: 17px; font-weight: 700; }
+  .modal-head .x { width: 30px; height: 30px; border-radius: 8px; border: none; background: #f3f4f6; color: #6b7280; cursor: pointer; font-size: 16px; }
+  .modal-body { padding: 20px 22px; }
+  .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid #f3f4f6; background: #fafafa; border-radius: 0 0 16px 16px; }
+  .form-row { margin-bottom: 15px; }
+  .form-row label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .form-row label .req { color: var(--brand); margin-left: 2px; }
+  .form-row input, .form-row select, .form-row textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 13px; font-size: 14px; outline: none; transition: border .15s, box-shadow .15s; font-family: inherit; }
+  .form-row textarea { min-height: 96px; resize: vertical; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(192,32,46,.1); }
+  .form-hint { font-size: 12px; color: #9ca3af; margin-top: 5px; }
+  .locked { background: #f9fafb; color: #6b7280; }
+  .field-err { font-size: 12px; color: var(--brand); margin-top: 5px; }
+
+  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: 480px; max-width: calc(100vw - 32px); background: #fff; box-shadow: -10px 0 40px rgba(0,0,0,.18); z-index: 55; transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; }
+  .drawer.show { transform: translateX(0); }
+  .drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--line); }
+  .drawer-head h3 { font-size: 18px; font-weight: 700; line-height: 1.45; }
+  .drawer-head .meta { font-size: 12.5px; color: #9ca3af; margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
+  .kv { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+  .kv .k { width: 84px; flex: none; font-size: 13px; font-weight: 600; color: #9ca3af; }
+  .kv .v { flex: 1; color: #374151; }
+  .kv.col { flex-direction: column; align-items: stretch; }
+  .kv.col .k { width: auto; margin-bottom: 4px; }
+  .box { border-radius: 10px; padding: 12px 14px; font-size: 14px; line-height: 1.7; }
+  .box.red { border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; }
+  .box.gray { border: 1px solid var(--line); background: #f9fafb; color: #374151; }
+  .box.amber { border: 1px solid #fde68a; background: #fffbeb; color: #b45309; font-size: 12.5px; line-height: 1.7; }
+  .drawer-foot { padding: 16px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
+
+  .view { display: none; }
+  .view.on { display: block; }
+  @media (max-width: 980px){ .sidebar { display:none; } }
+  /* 窄屏：表格卡片化，操作按钮右对齐整齐排布 */
+  @media (max-width: 900px){
+    .table, .table thead, .table tbody, .table tr, .table td { display: block; width: 100% !important; }
+    .table thead { display: none; }
+    .table tr { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 4px 14px; }
+    .table td { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #f3f4f6; }
+    .table td:last-child { border-bottom: none; }
+    .table td::before { font-size: 12.5px; color: #6b7280; font-weight: 600; flex: none; }
+    .table td:nth-child(1) { display: block; }
+    .table td:nth-child(1)::before { display: none; }
+    .table td:nth-child(2)::before { content: "指导教师"; }
+    .table td:nth-child(3)::before { content: "题目来源"; }
+    .table td:nth-child(4)::before { content: "所属学年"; }
+    .table td:nth-child(5)::before { content: "状态"; }
+    .table td:nth-child(6)::before { content: "操作"; }
+    .acts { flex-wrap: wrap; justify-content: flex-end; }
+  }
+</style>
+</head>
+<body>
+  <!-- 设计稿预览切换条（实际系统无此条） -->
+  <div class="view-bar">
+    <span class="lbl">设计稿预览 · 视图：</span>
+    <button id="v-list" class="on" onclick="setView('list')">① 列表页</button>
+    <button id="v-form" onclick="setView('form')">② 新建/编辑弹窗</button>
+    <button id="v-drawer" onclick="setView('drawer')">③ 详情抽屉</button>
+    <span class="tip">角色：教师 · 路线：/my-topics</span>
+  </div>
+
+  <div class="shell">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <div class="brand-head">
+        <div class="emblem">校</div>
+        <div>
+          <div class="cn">山西能源学院</div>
+          <div class="en">毕业设计综合管理系统</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <div class="group-label">通用</div>
+        <div class="nav-item"><span class="ico">▦</span> 工作台</div>
+        <div class="group-label">教师</div>
+        <div class="nav-item active"><span class="ico">✎</span> 我的题目申报</div>
+        <div class="nav-item"><span class="ico">☰</span> 我的指导情况</div>
+      </nav>
+      <div class="user-foot">
+        <div class="avatar">李</div>
+        <div class="meta">
+          <div class="name">李建国</div>
+          <div class="role">教师 · #37</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主区 -->
+    <div class="main">
+      <header class="topbar">
+        <div class="crumb">教师 / <b>我的题目申报</b></div>
+        <div class="year-badge"><span class="dot"></span> 当前届次：2026 届</div>
+      </header>
+
+      <div class="content">
+        <!-- ① 列表页 -->
+        <section id="view-list" class="view on">
+          <div class="page-head">
+            <h1>我的题目申报</h1>
+            <p>管理你提交的毕业设计题目。新建题目后系统自动查重，提交审核由管理员复核发布；被退回的题目可按意见修改后重新提交。</p>
+          </div>
+
+          <div class="toolbar">
+            <div class="field" style="gap:0">
+              <div class="seg">
+                <button class="on">全部</button>
+                <button>草稿</button>
+                <button>待查重</button>
+                <button>待审核</button>
+                <button>退回修改</button>
+                <button>已发布</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>关键词</label>
+              <input style="min-width:200px" placeholder="按题目名称搜索" />
+            </div>
+            <div class="spacer"></div>
+            <button class="btn primary">＋ 新建题目</button>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:30%">题目名称</th>
+                <th style="width:12%">指导教师</th>
+                <th style="width:12%">题目来源</th>
+                <th style="width:12%">所属学年</th>
+                <th style="width:12%">状态</th>
+                <th style="width:22%">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="t-title">基于深度学习的校园能耗预测系统</div><div class="t-sub">ID 1001</div></td>
+                <td>教师 #37</td>
+                <td><span class="badge b-purple">教师申报</span></td>
+                <td>2026 届</td>
+                <td><span class="badge b-amber">待审核</span></td>
+                <td><div class="acts"><button class="act">查看</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="t-title">工业物联网边缘计算节点调度优化</div><div class="t-sub">ID 1009</div></td>
+                <td>教师 #37</td>
+                <td><span class="badge b-purple">教师申报</span></td>
+                <td>2026 届</td>
+                <td><span class="badge b-blue">待查重</span></td>
+                <td><div class="acts"><button class="act">查看</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="t-title">基于机器视觉的零件表面缺陷检测</div><div class="t-sub">ID 1006</div></td>
+                <td>教师 #37</td>
+                <td><span class="badge b-purple">教师申报</span></td>
+                <td>2026 届</td>
+                <td><span class="badge b-red">退回修改</span></td>
+                <td><div class="acts"><button class="act primary">编辑</button><button class="act primary">重新提交</button><button class="act">查看</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="t-title">煤矿巷道围岩稳定性数值模拟分析</div><div class="t-sub">ID 1002（草稿示例）</div></td>
+                <td>教师 #37</td>
+                <td><span class="badge b-purple">教师申报</span></td>
+                <td>2026 届</td>
+                <td><span class="badge b-gray">草稿</span></td>
+                <td><div class="acts"><button class="act primary">编辑</button><button class="act primary">提交审核</button><button class="act">查看</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="t-title">光伏发电系统最大功率点跟踪控制</div><div class="t-sub">ID 1004</div></td>
+                <td>教师 #37</td>
+                <td><span class="badge b-purple">教师申报</span></td>
+                <td>2026 届</td>
+                <td><span class="badge b-green">已发布</span></td>
+                <td><div class="acts"><button class="act">查看</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pager">
+            <div>共 <b>5</b> 条 · 第 <b>1</b> / 1 页</div>
+            <div style="display:flex;gap:6px"><button class="pg" disabled>上一页</button><button class="pg" disabled>下一页</button></div>
+          </div>
+
+          <div class="note">
+            <span>⚠</span>
+            <div><b>后端缺口提示：</b>疑似重复题目目前无复核接口，将卡在「待查重/待审核」无法提交发布。教师侧在「待查重」与提交失败时显示此提示，不假装可绕过（待后端补齐 duplicate-check 复核能力）。</div>
+          </div>
+        </section>
+
+        <!-- ② 新建/编辑弹窗 -->
+        <section id="view-form" class="view">
+          <div class="page-head"><h1>② 新建 / 编辑题目（弹窗，z-80）</h1><p>教师填写题目基本信息。题目来源与申报人默认锁定；指导教师 MVP 默认本人，待教师列表接口就绪后放开。</p></div>
+          <div class="note" style="margin-top:0;margin-bottom:18px"><span>ℹ</span><div>此处为弹窗内部示意，叠加在列表页之上（遮罩 <code>rgba(17,24,39,.4)</code> + 居中卡片）。下方展示表单本体。</div></div>
+
+          <div class="modal-body" style="border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08)">
+            <div class="modal-head" style="border-radius:16px 16px 0 0">
+              <h3>新建题目</h3>
+              <button class="x">×</button>
+            </div>
+            <div style="padding:20px 22px">
+              <div class="form-row">
+                <label>题目名称<span class="req">*</span></label>
+                <input placeholder="例如：基于深度学习的校园能耗预测系统" value="基于深度学习的校园能耗预测系统" />
+              </div>
+              <div class="form-row">
+                <label>所属学年<span class="req">*</span></label>
+                <select><option>2026 届</option><option>2027 届</option></select>
+              </div>
+              <div class="form-row">
+                <label>题目来源<span class="req">*</span></label>
+                <select class="locked"><option>教师申报（TEACHER）</option></select>
+                <div class="form-hint">教师申报默认锁定，不可改为管理员录入。</div>
+              </div>
+              <div class="form-row">
+                <label>申报人<span class="req">*</span></label>
+                <input class="locked" value="李建国（#37）" readonly />
+                <div class="form-hint">自动取当前登录教师，锁定不可改。</div>
+              </div>
+              <div class="form-row">
+                <label>指导教师<span class="req">*</span></label>
+                <select class="locked"><option>李建国（#37，本人）</option></select>
+                <div class="form-hint">后端暂无教师列表接口，MVP 默认本人；接口就绪后放开为可选。</div>
+              </div>
+              <div class="form-row">
+                <label>题目描述</label>
+                <textarea placeholder="简述研究内容、技术路线与预期目标（建议 30–200 字）">面向校园建筑能耗数据，采用 LSTM 等深度学习模型进行短期与中长期能耗预测，为节能调度提供决策支持。</textarea>
+                <div class="form-hint">选填，建议补充技术路线与数据集说明，利于审核通过。</div>
+              </div>
+            </div>
+            <div class="modal-foot">
+              <button class="btn">取消</button>
+              <button class="btn primary">保存</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ③ 详情抽屉 -->
+        <section id="view-drawer" class="view">
+          <div class="page-head"><h1>③ 题目详情（抽屉，z-55）</h1><p>只读展示题目信息、退回意见与查重提示；底部按状态提供教师动作（编辑 / 提交审核）。不含审核/退回按钮，避免教师自审批。</p></div>
+          <div class="note" style="margin-top:0;margin-bottom:18px"><span>ℹ</span><div>此处为抽屉内部示意，从右侧滑入（宽 480px，z-55，叠加在列表页之上）。下方展示抽屉本体。</div></div>
+
+          <div style="border:1px solid var(--line);border-radius:16px;overflow:hidden;max-width:480px">
+            <div class="drawer-head">
+              <div>
+                <h3>基于机器视觉的零件表面缺陷检测</h3>
+                <div class="meta"><span class="badge b-purple">教师申报</span><span>2026 届</span><span>ID 1006</span></div>
+              </div>
+              <button class="x" style="width:30px;height:30px;border-radius:8px;border:none;background:#f3f4f6;color:#6b7280;cursor:pointer">×</button>
+            </div>
+            <div class="drawer-body">
+              <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
+                <span style="font-size:12.5px;font-weight:600;color:#6b7280">当前状态</span>
+                <span class="badge b-red">退回修改</span>
+              </div>
+              <div class="kv"><div class="k">题目来源</div><div class="v">教师申报</div></div>
+              <div class="kv"><div class="k">指导教师</div><div class="v">教师 #37</div></div>
+              <div class="kv"><div class="k">申报人</div><div class="v">教师 #37</div></div>
+              <div class="kv"><div class="k">所属学年</div><div class="v">2026 届</div></div>
+              <div class="kv col"><div class="k">退回意见</div><div class="box red">描述过于简略，缺少技术路线与数据集说明，请补充后重新提交。</div></div>
+              <div class="kv col"><div class="k">题目描述</div><div class="box gray">使用 YOLO 系列目标检测模型对工业零件表面划痕、凹坑等缺陷进行识别与定位。</div></div>
+              <div class="box amber"><b>查重提示（待后端补齐）：</b>系统查重中或若被判定为疑似重复，将无法提交审核，需管理员复核确认不重复后方可继续。</div>
+            </div>
+            <div class="drawer-foot">
+              <button class="btn primary" style="flex:1">编辑</button>
+              <button class="btn primary" style="flex:1">重新提交审核</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setView(v) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('on'));
+      document.getElementById('view-' + v).classList.add('on');
+      ['list','form','drawer'].forEach(id => {
+        document.getElementById('v-' + id).classList.toggle('on', id === v);
+      });
+    }
+  </script>
+</body>
+</html>
