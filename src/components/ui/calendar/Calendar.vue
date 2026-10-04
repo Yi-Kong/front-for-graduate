@@ -34,18 +34,19 @@ const emit = defineEmits(['update:modelValue'])
     :min-value="minValue"
     :max-value="maxValue"
     :is-date-disabled="isDateDisabled"
+    :fixed-weeks="true"
     :locale="locale"
     @update:model-value="emit('update:modelValue', $event)"
     :class="cn('p-3', props.class)"
   >
     <CalendarHeader class="relative flex w-full items-center justify-center">
-      <CalendarPrev :class="cn(buttonVariants({ variant: 'outline' }), 'absolute left-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100')">
+      <CalendarPrev :class="cn(buttonVariants({ variant: 'outline' }), 'absolute left-1 h-7 w-7 cursor-pointer bg-transparent p-0 opacity-50 hover:opacity-100')">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
       </CalendarPrev>
       <CalendarHeading class="text-sm font-medium" v-slot="{ headingValue }">
         <slot name="heading" :heading-value="headingValue">{{ headingValue }}</slot>
       </CalendarHeading>
-      <CalendarNext :class="cn(buttonVariants({ variant: 'outline' }), 'absolute right-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100')">
+      <CalendarNext :class="cn(buttonVariants({ variant: 'outline' }), 'absolute right-1 h-7 w-7 cursor-pointer bg-transparent p-0 opacity-50 hover:opacity-100')">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
       </CalendarNext>
     </CalendarHeader>
@@ -78,7 +79,7 @@ const emit = defineEmits(['update:modelValue'])
               <CalendarCellTrigger
                 :day="weekDate"
                 :month="month.value"
-                :class="cn(buttonVariants({ variant: 'ghost' }), 'h-9 w-9 p-0 font-normal aria-selected:opacity-100 data-[selected]:bg-[#C0202E] data-[selected]:text-white data-[selected]:opacity-100 data-[today]:bg-accent data-[today]:text-accent-foreground data-[outside-view]:text-muted-foreground')"
+                :class="cn(buttonVariants({ variant: 'ghost' }), 'h-9 w-9 cursor-pointer p-0 font-normal aria-selected:opacity-100 data-[disabled]:cursor-not-allowed data-[selected]:bg-[#C0202E] data-[selected]:text-white data-[selected]:opacity-100 data-[today]:bg-accent data-[today]:text-accent-foreground data-[outside-view]:text-muted-foreground')"
               />
             </CalendarCell>
           </CalendarGridRow>
