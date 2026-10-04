@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, unref } from 'vue'
 import { useQuery, useMutation } from '@tanstack/vue-query'
 import {
   validateImport,
@@ -75,6 +75,11 @@ const commitMutation = useMutation({
     batchId.value = null
   },
 })
+// ⚠️ useMutation() 返回「含 ref 的普通对象」，模板里直接写 xxxMutation.isPending 拿到的是 Ref 本身
+// （恒为真），会让按钮永久禁用并一直显示「校验中…／导入中…」。必须显式 unref 成布尔值再用。
+const validating = computed(() => unref(validateMutation.isPending))
+const committing = computed(() => unref(commitMutation.isPending))
+
 function onCommit() {
   commitMutation.mutate()
 }
@@ -165,18 +170,18 @@ function downloadErrors() {
       <div class="mt-4 flex justify-end gap-2.5">
         <button
           class="h-10 rounded-[10px] border border-gray-200 bg-white px-4 text-[14px] font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
-          :disabled="!file || validateMutation.isPending"
+          :disabled="!file || validating"
           @click="file = null"
         >
           重新选择
         </button>
         <button
           class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#C0202E] px-4 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px disabled:opacity-60"
-          :disabled="!file || validateMutation.isPending"
+          :disabled="!file || validating"
           @click="onValidate"
         >
-          <svg v-if="validateMutation.isPending" class="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          {{ validateMutation.isPending ? '校验中…' : '校验' }}
+          <svg v-if="validating" class="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          {{ validating ? '校验中…' : '校验' }}
         </button>
       </div>
     </div>
@@ -239,11 +244,11 @@ function downloadErrors() {
             <button class="act" @click="downloadErrors">下载错误明细</button>
             <button
               class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#C0202E] px-4 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px disabled:opacity-60"
-              :disabled="commitMutation.isPending || batch.failed_rows === batch.total_rows"
+              :disabled="committing || batch.failed_rows === batch.total_rows"
               @click="onCommit"
             >
-              <svg v-if="commitMutation.isPending" class="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              {{ commitMutation.isPending ? '导入中…' : `提交导入（${batch.success_rows} 行）` }}
+              <svg v-if="committing" class="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              {{ committing ? '导入中…' : `提交导入（${batch.success_rows} 行）` }}
             </button>
           </div>
         </template>

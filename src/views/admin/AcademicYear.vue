@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, unref } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import {
   getAcademicYears,
@@ -73,6 +73,12 @@ const deleteMutation = useMutation({
     invalidate()
   },
 })
+
+// ⚠️ useMutation() 返回「含 ref 的普通对象」，模板里直接写 xxxMutation.isPending 拿到的是 Ref 本身
+// （恒为真），会让按钮永久禁用并一直显示「保存中…」。必须显式 unref 成布尔值再用。
+const savingYear = computed(() => unref(saveMutation.isPending))
+const activating = computed(() => unref(activateMutation.isPending))
+const removingYear = computed(() => unref(deleteMutation.isPending))
 
 function onFormSubmit(payload) {
   saveMutation.mutate(payload)
@@ -155,7 +161,7 @@ function yearBadge(name) {
                 <button
                   v-if="!y.is_current"
                   class="act act-primary"
-                  :disabled="activateMutation.isPending"
+                  :disabled="activating"
                   @click="activateMutation.mutate(y.id)"
                 >
                   设为当前
@@ -163,7 +169,7 @@ function yearBadge(name) {
                 <button class="act" @click="openEdit(y)">编辑</button>
                 <button
                   class="act act-danger"
-                  :disabled="y.is_current || deleteMutation.isPending"
+                  :disabled="y.is_current || removingYear"
                   :title="y.is_current ? '当前激活届次不可删除' : ''"
                   @click="askDelete(y)"
                 >
@@ -180,7 +186,7 @@ function yearBadge(name) {
       :open="formOpen"
       :mode="formMode"
       :initial="editing"
-      :loading="saveMutation.isPending"
+      :loading="savingYear"
       @close="formOpen = false"
       @submit="onFormSubmit"
     />
@@ -189,7 +195,7 @@ function yearBadge(name) {
       title="删除届次"
       :message="deleting ? `确定删除「${deleting.name}」？删除后不可恢复。` : ''"
       confirm-text="删除"
-      :loading="deleteMutation.isPending"
+      :loading="removingYear"
       @close="confirmOpen = false"
       @confirm="onConfirmDelete"
     />
