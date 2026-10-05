@@ -13,6 +13,11 @@ export function getTopics(params = {}) {
   return request.get('/topics/', { params })
 }
 
+// 学生端可选题目：只取 PUBLISHED（后端按角色过滤；mock 同构）
+export function getSelectableTopics(params = {}) {
+  return request.get('/topics/', { params: { status: 'PUBLISHED', ...params } })
+}
+
 export function getTopicDetail(id) {
   return request.get(`/topics/${id}/`)
 }

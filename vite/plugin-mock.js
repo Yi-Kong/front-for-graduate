@@ -76,9 +76,22 @@ export function mockPlugin(options = {}) {
               })
             : matched.mock.response
 
+        // 支持 mock 显式返回错误（{ __mockError: { status, body } }），用于演示 4xx。
+        // 约定：response 返回该形状时按 status 返回 body，未声明时不影响既有 mock。
+        if (
+          result &&
+          typeof result === 'object' &&
+          !Array.isArray(result) &&
+          '__mockError' in result
+        ) {
+          res.statusCode = result.__mockError.status || 400
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify(result.__mockError.body))
+          return
+        }
         const payload =
           typeof result === 'string' ? result : JSON.stringify(result)
-        res.statusCode = 200
+        res.statusCode = matched.mock.status || 200
         res.setHeader('Content-Type', 'application/json; charset=utf-8')
         res.end(payload)
       } catch (err) {

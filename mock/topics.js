@@ -53,6 +53,14 @@ const db = loadDb(seed)
 commit(db)
 let nextId = db.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1
 
+// 请求级重新装载：选题 mock 会直接改写落盘 topics.json 的题目 status，
+// 列表/详情读取前先从磁盘同步，保证「选题后该题从列表消失」联动生效。
+function reloadDb() {
+  const arr = loadDb(seed)
+  db.splice(0, db.length, ...arr)
+  nextId = db.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1
+}
+
 function paginate(rows, query) {
   const page = Number(query.page) || 1
   const size = Number(query.page_size) || 10
@@ -68,9 +76,13 @@ export default [
     url: '/api/topics/',
     method: 'get',
     response: ({ query }) => {
+      reloadDb()
+      commit(db) // 保持落盘与内存一致，避免 topics.json 被清/损坏后选题 mock 读不到题目
       let rows = db
       if (query.proposer) rows = rows.filter((t) => t.proposer === Number(query.proposer))
       if (query.status) rows = rows.filter((t) => t.status === query.status)
+      // 学生视角：已选定的题目对其他学生不可见
+      rows = rows.filter((t) => t.status !== 'SELECTED')
       if (query.keyword) {
         const kw = String(query.keyword).toLowerCase()
         rows = rows.filter((t) => t.title.toLowerCase().includes(kw))
@@ -147,6 +159,17 @@ export default [
       item.status = 'REJECTED'
       item.review_comment = body?.comment || ''
       commit(db)
+      return { ...item }
+    },
+  },
+  {
+    url: '/api/topics/:id/',
+    method: 'get',
+    response: ({ params }) => {
+      reloadDb()
+      commit(db)
+      const item = db.find((t) => t.id === Number(params.id))
+      if (!item) return { __mockError: { status: 404, body: { detail: '题目不存在' } } }
       return { ...item }
     },
   },

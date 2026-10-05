@@ -40,16 +40,16 @@ const seed = [
     id: 1,
     academic_year: 1, // 2026 届
     round_no: 1,
-    start_time: '2026-03-02T09:00',
-    end_time: '2026-03-09T23:59',
+    start_time: '2026-10-01T09:00',
+    end_time: '2026-10-20T23:59',
     status: 'OPEN',
   },
   {
     id: 2,
     academic_year: 1, // 2026 届
     round_no: 2,
-    start_time: '2026-03-16T09:00',
-    end_time: '2026-03-23T23:59',
+    start_time: '2026-11-01T09:00',
+    end_time: '2026-11-12T23:59',
     status: 'PENDING',
   },
   {

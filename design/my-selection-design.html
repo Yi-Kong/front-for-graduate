@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>我的选题 · 设计稿 v1（山西能源学院 · 学生端）</title>
+<style>
+  :root {
+    --brand: #C0202E;        /* 山能红 */
+    --brand-deep: #A81B28;
+    --brand-dark: #8F1822;
+    --brand-soft: #fdecee;
+    --gold: #E3B23C;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: #eef0f3;
+    min-height: 100vh;
+  }
+
+  /* 设计稿预览用：场景切换条 */
+  .role-bar {
+    position: sticky; top: 0; z-index: 60;
+    background: #111827; color: #e5e7eb;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 8px 16px; font-size: 12.5px;
+  }
+  .role-bar .lbl { opacity: .75; letter-spacing: .5px; }
+  .role-bar .sep { opacity: .3; }
+  .role-bar button {
+    border: 1px solid #374151; background: transparent; color: #d1d5db;
+    font-size: 12.5px; padding: 4px 14px; border-radius: 999px; cursor: pointer;
+    transition: all .15s; font-family: inherit;
+  }
+  .role-bar button:hover { border-color: #6b7280; }
+  .role-bar button.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+  .role-bar .tip { margin-left: auto; opacity: .55; font-size: 11.5px; }
+
+  .shell { display: flex; min-height: calc(100vh - 37px); }
+
+  /* ---------- 侧边栏 ---------- */
+  .sidebar {
+    width: 248px; flex: none; background: #fff;
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    position: sticky; top: 37px; height: calc(100vh - 37px);
+  }
+  .brand-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 18px 16px; border-bottom: 1px solid var(--line);
+  }
+  .brand-head .emblem { width: 30px; height: 30px; border-radius: 50%; background: #fff; object-fit: contain; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .brand-head .cn { font-size: 15px; font-weight: 700; letter-spacing: .5px; line-height: 1.2; }
+  .brand-head .en { font-size: 10px; color: var(--muted); letter-spacing: .5px; margin-top: 2px; }
+  .nav { flex: 1; overflow-y: auto; padding: 14px 12px; }
+  .group-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; padding: 12px 12px 6px; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 3px;
+    font-size: 14px; color: #374151; text-decoration: none; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .nav-item:hover { background: #f3f4f6; }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; }
+  .nav-item .ico { width: 18px; height: 18px; flex: none; }
+  .user-foot {
+    border-top: 1px solid var(--line); padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-foot .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+  .user-foot .meta { flex: 1; min-width: 0; }
+  .user-foot .name { font-size: 13.5px; font-weight: 600; }
+  .user-foot .role { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .user-foot .logout {
+    border: none; background: #f3f4f6; color: var(--muted); cursor: pointer;
+    width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ---------- 主区 ---------- */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 56px; flex: none; background: #fff; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 12px;
+  }
+  .topbar .crumb { font-size: 13px; color: var(--muted); }
+  .topbar .crumb b { color: var(--ink); font-weight: 600; }
+  .year-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: var(--brand-dark);
+    background: var(--brand-soft); border: 1px solid #f6d3d7; border-radius: 999px; padding: 5px 13px;
+  }
+  .year-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+
+  .content { padding: 26px 28px 36px; flex: 1; }
+  .page-head { margin-bottom: 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .page-head h1 { font-size: 24px; font-weight: 700; letter-spacing: .5px; }
+  .page-head p { font-size: 13.5px; color: var(--muted); margin-top: 6px; max-width: 720px; line-height: 1.6; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 38px; padding: 0 16px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: 1px solid transparent; transition: background .15s, color .15s, border-color .15s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { background: #f9fafb; border-color: #d1d5db; }
+
+  .preview-hint {
+    background: #eef2ff; border: 1px solid #c7d2fe; color: #4338ca;
+    font-size: 12.5px; padding: 9px 14px; border-radius: 10px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; line-height: 1.6;
+  }
+  .preview-hint b { font-weight: 700; }
+  .preview-hint button {
+    border: 1px solid #c7d2fe; background: #fff; color: #4338ca; font-size: 12px;
+    padding: 3px 10px; border-radius: 999px; cursor: pointer; font-family: inherit; font-weight: 600;
+  }
+  .preview-hint button:hover { background: #e0e7ff; }
+
+  /* ---------- 错误条 ---------- */
+  .err-bar {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px;
+    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+    border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.65;
+  }
+  .err-bar svg { flex: none; margin-top: 1px; }
+  .err-bar .x { margin-left: auto; border: none; background: transparent; color: #b91c1c; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; flex: none; }
+
+  /* ---------- 轮次状态条 ---------- */
+  .round-bar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 14px 18px; margin-bottom: 16px;
+  }
+  .round-bar .round-no {
+    width: 42px; height: 42px; flex: none; border-radius: 10px; background: var(--brand); color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1;
+  }
+  .round-bar .round-no small { font-size: 9px; font-weight: 600; opacity: .85; }
+  .round-bar .round-no span { font-size: 13px; font-weight: 700; }
+  .round-bar .txt { flex: 1; min-width: 220px; }
+  .round-bar .txt .t1 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .round-bar .txt .t2 { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .round-bar.closed .round-no { background: #4338ca; }
+  .round-bar.pending .round-no { background: #b45309; }
+  .round-bar.unknown { background: #f9fafb; border-style: dashed; }
+  .round-bar.unknown .round-no { background: #9ca3af; }
+
+  /* ---------- 我的选题结果卡 ---------- */
+  .result-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; margin-bottom: 16px;
+  }
+  .result-card .cap {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .result-card .cap h3 { font-size: 15px; font-weight: 700; letter-spacing: .3px; }
+  .result-card .cap .sub { font-size: 12.5px; color: var(--muted); }
+  .result-body { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .result-body .left { flex: 1; min-width: 260px; }
+  .result-body .title { font-size: 17px; font-weight: 700; line-height: 1.5; color: var(--ink); }
+  .result-body .badges { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .result-body .kvs { margin-top: 12px; }
+  .result-body .kvs .kv { padding: 9px 0; }
+  .result-body .acts-v { display: flex; flex-direction: column; gap: 9px; width: 148px; flex: none; }
+  .result-empty {
+    display: flex; align-items: center; gap: 14px; padding: 8px 0 4px;
+  }
+  .result-empty .ico-wrap {
+    width: 52px; height: 52px; flex: none; border-radius: 14px; background: #f3f4f6; color: #9ca3af;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .result-empty h4 { font-size: 15px; font-weight: 700; }
+  .result-empty p { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.6; max-width: 520px; }
+
+  /* ---------- 筛选条 ---------- */
+  .filter-bar {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px;
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; margin-bottom: 16px;
+  }
+  .filter-bar .fitem { display: flex; flex-direction: column; gap: 6px; }
+  .filter-bar .fitem.grow { flex: 1; min-width: 180px; }
+  .filter-bar label { font-size: 12.5px; font-weight: 600; color: #374151; }
+  .input, .select {
+    height: 40px; border: 1px solid var(--line); border-radius: 10px;
+    padding: 0 13px; font-size: 14px; color: var(--ink); background: #fff; font-family: inherit;
+    transition: border-color .15s, box-shadow .15s; min-width: 160px;
+  }
+  .input:focus, .select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(192,32,46,.10); }
+  .filter-acts { display: flex; gap: 10px; margin-left: auto; }
+
+  /* ---------- 表格卡片 ---------- */
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 820px; }
+  thead th {
+    text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted);
+    background: #f9fafb; padding: 12px 20px; border-bottom: 1px solid var(--line);
+    letter-spacing: .3px; white-space: nowrap;
+  }
+  tbody td { font-size: 14px; padding: 15px 20px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fcfcfd; }
+  .t-title { font-weight: 600; color: var(--ink); }
+  .t-title:hover { color: var(--brand); cursor: pointer; }
+  .row-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  tr.current-row { background: var(--brand-soft); }
+  tr.current-row:hover { background: #fbdde0; }
+  .cur-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--brand-dark); }
+
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 11px; border-radius: 999px; white-space: nowrap; }
+  .pill.published { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .pill.selected { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .pill.src-teacher { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .pill.src-admin { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+  .pill.live { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .pill.wait { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .pill.done { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; }
+  .pill.gray { background: #f3f4f6; color: #6b7280; border: 1px solid var(--line); }
+
+  .acts { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .act {
+    display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+    height: 30px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: #4b5563;
+    font-size: 13px; font-weight: 600; line-height: 1; cursor: pointer; font-family: inherit;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .act:hover { background: #f9fafb; border-color: #d1d5db; color: var(--ink); }
+  .act.primary { color: var(--brand); background: var(--brand-soft); border-color: #f6d3d7; }
+  .act.primary:hover { background: #fbdde0; border-color: #efc2c7; color: var(--brand-dark); }
+  .act:disabled { opacity: .45; cursor: not-allowed; }
+
+  .pager { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+  .pager .info { font-size: 13px; color: var(--muted); }
+  .pager .pages { display: flex; gap: 6px; }
+  .pager .pg {
+    min-width: 34px; height: 34px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff;
+    color: #4b5563; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex: none;
+  }
+  .pager .pg.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .pager .pg:disabled { opacity: .45; cursor: not-allowed; }
+
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 20px; text-align: center; gap: 14px; }
+  .empty .ico-wrap { width: 64px; height: 64px; border-radius: 16px; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; }
+  .empty h3 { font-size: 16px; font-weight: 700; }
+  .empty p { font-size: 13.5px; color: var(--muted); max-width: 360px; line-height: 1.6; }
+
+  .note {
+    margin-top: 20px; display: flex; gap: 10px; align-items: flex-start;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 12px 14px; font-size: 12.5px; color: #92400e; line-height: 1.7;
+  }
+  .note svg { flex: none; margin-top: 1px; }
+  .note code { background: #fef3c7; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .note b { color: #78350f; }
+
+  .hidden { display: none !important; }
+
+  /* ---------- 详情抽屉 ---------- */
+  .drawer-mask { position: fixed; inset: 0; background: rgba(17,24,39,.4); z-index: 80; display: none; }
+  .drawer-mask.show { display: block; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 460px; max-width: calc(100vw - 32px);
+    background: #fff; z-index: 85; box-shadow: -12px 0 40px rgba(0,0,0,.2);
+    transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.show { transform: translateX(0); }
+  .drawer-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .drawer-head h3 { font-size: 18px; font-weight: 700; line-height: 1.45; }
+  .drawer-head .sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+  .drawer-head .x { border: none; background: #f3f4f6; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; flex: none; }
+  .drawer-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+  .drawer-foot { border-top: 1px solid var(--line); padding: 16px 22px; display: flex; gap: 10px; }
+  .drawer-foot .btn { flex: 1; justify-content: center; height: 42px; }
+  .kv { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid #f3f4f6; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { font-size: 13px; color: var(--muted); width: 92px; flex: none; font-weight: 600; }
+  .kv .v { font-size: 14px; color: var(--ink); line-height: 1.65; flex: 1; }
+  .desc-box { background: #f9fafb; border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; font-size: 14px; line-height: 1.75; color: #374151; margin-top: 4px; }
+
+  /* ---------- 确认弹窗 ---------- */
+  .mask { position: fixed; inset: 0; background: rgba(17,24,39,.45); z-index: 90; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .mask.show { display: flex; }
+  .modal { width: 460px; max-width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,.25); overflow: hidden; }
+  .modal-head { padding: 18px 22px; border-bottom: 1px solid var(--line); font-size: 17px; font-weight: 700; }
+  .modal-body { padding: 20px 22px; }
+  .modal-body .lead { font-size: 14px; line-height: 1.7; color: #374151; }
+  .confirm-info { margin-top: 12px; background: var(--brand-soft); border: 1px solid #f6d3d7; color: var(--brand-dark); font-size: 13px; line-height: 1.7; border-radius: 10px; padding: 12px 14px; }
+  .modal-foot { padding: 16px 22px; border-top: 1px solid var(--line); background: #fafafa; display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* 响应式 */
+  .hamburger { display: none; }
+  .scrim { display: none; }
+  @media (max-width: 768px) {
+    .sidebar { position: fixed; left: 0; top: 37px; bottom: 0; z-index: 70; transform: translateX(-100%); transition: transform .25s ease; box-shadow: 2px 0 16px rgba(0,0,0,.15); }
+    .sidebar.open { transform: translateX(0); }
+    .hamburger { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; flex: none; }
+    .scrim.show { display: block; position: fixed; inset: 37px 0 0 0; background: rgba(17,24,39,.4); z-index: 65; }
+    .topbar { padding: 0 14px; }
+    .content { padding: 18px 14px 28px; }
+    .filter-bar { padding: 14px; }
+    .input, .select { min-width: 0; width: 100%; }
+    .filter-bar .fitem { width: 100%; }
+    .filter-acts { margin-left: 0; width: 100%; }
+    .filter-acts .btn { flex: 1; justify-content: center; }
+    .page-head h1 { font-size: 21px; }
+    .result-body .acts-v { width: 100%; flex-direction: row; }
+    .result-body .acts-v .btn { flex: 1; }
+  }
+  @media (max-width: 560px) {
+    table, thead, tbody, tr, td { display: block; width: 100% !important; }
+    thead { display: none; }
+    .card { overflow: visible; border: none; background: transparent; }
+    tr { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 4px 14px; background: #fff; }
+    td { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #f3f4f6; }
+    td:last-child { border-bottom: none; }
+    td::before { content: attr(data-label); font-size: 12.5px; color: var(--muted); font-weight: 600; flex: none; }
+    .acts { justify-content: flex-end; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+  <!-- 设计稿预览切换条（实际系统无此条） -->
+  <div class="role-bar">
+    <span class="lbl">设计稿预览 · 选题状态：</span>
+    <button id="btn-none" class="on" onclick="setState('none')">未选题</button>
+    <button id="btn-done" onclick="setState('done')">已选题</button>
+    <span class="sep">|</span>
+    <span class="lbl">轮次：</span>
+    <button id="btn-open" class="on" onclick="setRound('open')">进行中</button>
+    <button id="btn-pending" onclick="setRound('pending')">待开始</button>
+    <button id="btn-closed" onclick="setRound('closed')">已结束</button>
+    <button id="btn-unknown" onclick="setRound('unknown')">状态未知</button>
+    <span class="tip">实际实现：菜单按登录 role_codes 过滤，本页限 STUDENT</span>
+  </div>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand-head">
+        <img class="emblem" src="school-logo.png" alt="校徽" />
+        <div>
+          <div class="cn">毕业设计综合管理系统</div>
+          <div class="en">SHANXI INSTITUTE OF ENERGY</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <div class="group-label">通用</div>
+        <a class="nav-item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
+          工作台
+        </a>
+        <div class="group-label">学生</div>
+        <a class="nav-item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          题目浏览
+        </a>
+        <a class="nav-item active">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M5 12.5 10 17l9-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          我的选题
+        </a>
+      </nav>
+      <div class="user-foot">
+        <div class="avatar">王</div>
+        <div class="meta">
+          <div class="name">王梓涵</div>
+          <div class="role">学生 · STUDENT</div>
+        </div>
+        <button class="logout" title="退出登录">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="hamburger" onclick="toggleSidebar()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <span class="crumb">首页 / <b>我的选题</b></span>
+        </div>
+        <span class="year-badge"><span class="dot"></span>2026 届</span>
+      </div>
+      <div class="scrim" id="scrim" onclick="toggleSidebar()"></div>
+
+      <div class="content">
+        <div class="preview-hint">
+          <b>设计稿说明</b>
+          顶部按钮用于预览各状态组合；确认弹窗与抽屉点击下方按钮触发。
+          <button onclick="toggleErr()">切换「题目被抢」错误条</button>
+        </div>
+
+        <div class="page-head">
+          <div>
+            <h1>我的选题</h1>
+            <p>查看你本届的选题结果。选题轮次开放期间可选题或改选，题目先到先得；改选会释放原选题目，其他同学可立即选定。</p>
+          </div>
+        </div>
+
+        <!-- 错误条：选题失败（题目被抢 / 轮次未开放 / 校验失败） -->
+        <div class="err-bar hidden" id="errBar">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div><b>选题未成功：</b>该题目不可选，可能已被其他同学选定。列表已刷新，请另选一题。</div>
+          <button class="x" onclick="toggleErr()">关闭</button>
+        </div>
+
+        <!-- ① 轮次状态条 -->
+        <div class="round-bar" id="roundBar">
+          <div class="round-no"><small>第</small><span id="roundNo">1</span><small>轮</small></div>
+          <div class="txt">
+            <div class="t1">
+              <span id="roundTitle">第 1 轮选题</span>
+              <span class="pill live" id="roundPill">进行中</span>
+            </div>
+            <div class="t2" id="roundTime">开放 2026-04-11 09:00　截止 2026-04-25 23:59</div>
+          </div>
+        </div>
+
+        <!-- ② 我的选题结果 -->
+        <div class="result-card">
+          <div class="cap">
+            <h3>我的选题结果</h3>
+            <span class="sub">数据来自 <code>GET /api/students/me/selection-result/</code>，详情字段由 <code>GET /api/topics/{id}/</code> 补全</span>
+          </div>
+
+          <!-- 已选题 -->
+          <div class="result-body" id="viewDone">
+            <div class="left">
+              <div class="title">光伏发电系统最大功率点跟踪控制策略研究</div>
+              <div class="badges">
+                <span class="pill selected">已选定</span>
+                <span class="pill src-teacher">教师申报</span>
+                <span class="pill gray">第 1 轮</span>
+              </div>
+              <div class="kvs">
+                <div class="kv"><div class="k">指导教师</div><div class="v">李建国</div></div>
+                <div class="kv"><div class="k">所属学年</div><div class="v">2026 届</div></div>
+                <div class="kv"><div class="k">提交时间</div><div class="v">2026-04-12 10:24</div></div>
+              </div>
+            </div>
+            <div class="acts-v">
+              <button class="btn btn-ghost" onclick="openDrawer('current')">查看详情</button>
+              <button class="btn btn-primary" id="btnChange" onclick="openConfirm('change')">改选题目</button>
+            </div>
+          </div>
+
+          <!-- 未选题 -->
+          <div id="viewNone" class="hidden">
+            <div class="result-empty">
+              <div class="ico-wrap">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 19V5a1 1 0 0 1 1-1h9l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 4v5h5" stroke="currentColor" stroke-width="1.7"/></svg>
+              </div>
+              <div>
+                <h4>你还没有选题</h4>
+                <p id="noneTip">当前第 1 轮选题已开放，可在下方列表中选择题目前往「题目浏览」查看全部已发布题目。</p>
+              </div>
+            </div>
+            <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="btnGoBrowse">去题目浏览</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ③ 可选题目列表 -->
+        <div class="filter-bar">
+          <div class="fitem grow">
+            <label>关键词</label>
+            <input class="input" placeholder="按题目名称搜索" />
+          </div>
+          <div class="fitem">
+            <label>所属学年</label>
+            <select class="select"><option>全部</option><option>2026 届</option><option>2025 届</option></select>
+          </div>
+          <div class="filter-acts">
+            <button class="btn btn-ghost">重置</button>
+            <button class="btn btn-primary">查询</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 30%">题目名称</th>
+                <th style="width: 13%">指导教师</th>
+                <th style="width: 13%">题目来源</th>
+                <th style="width: 13%">所属学年</th>
+                <th style="width: 11%">状态</th>
+                <th style="width: 20%">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="rowCurrent" class="current-row hidden">
+                <td data-label="题目名称">
+                  <div class="t-title" onclick="openDrawer('current')">光伏发电系统最大功率点跟踪控制策略研究</div>
+                  <div class="row-sub cur-tag">★ 我的当前选题</div>
+                </td>
+                <td data-label="指导教师">李建国</td>
+                <td data-label="题目来源"><span class="pill src-teacher">教师申报</span></td>
+                <td data-label="所属学年">2026 届</td>
+                <td data-label="状态"><span class="pill selected">已选定</span></td>
+                <td data-label="操作">
+                  <div class="acts">
+                    <button class="act" onclick="openDrawer('current')">查看详情</button>
+                    <button class="act primary" disabled>当前选题</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td data-label="题目名称">
+                  <div class="t-title" onclick="openDrawer('b')">校园二手交易平台的设计与实现</div>
+                  <div class="row-sub">选题截止前可随时改选</div>
+                </td>
+                <td data-label="指导教师">张敏</td>
+                <td data-label="题目来源"><span class="pill src-teacher">教师申报</span></td>
+                <td data-label="所属学年">2026 届</td>
+                <td data-label="状态"><span class="pill published">已发布</span></td>
+                <td data-label="操作">
+                  <div class="acts">
+                    <button class="act" onclick="openDrawer('b')">查看详情</button>
+                    <button class="act primary" id="btnB" onclick="openConfirm('choose')">选择此题</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td data-label="题目名称">
+                  <div class="t-title" onclick="openDrawer('c')">煤矿巷道围岩稳定性数值模拟分析</div>
+                </td>
+                <td data-label="指导教师">赵振华</td>
+                <td data-label="题目来源"><span class="pill src-admin">管理员录入</span></td>
+                <td data-label="所属学年">2026 届</td>
+                <td data-label="状态"><span class="pill published">已发布</span></td>
+                <td data-label="操作">
+                  <div class="acts">
+                    <button class="act" onclick="openDrawer('c')">查看详情</button>
+                    <button class="act primary" onclick="openConfirm('choose')">选择此题</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td data-label="题目名称">
+                  <div class="t-title" onclick="openDrawer('d')">基于机器学习的风电功率预测方法研究</div>
+                </td>
+                <td data-label="指导教师">孙立鹏</td>
+                <td data-label="题目来源"><span class="pill src-teacher">教师申报</span></td>
+                <td data-label="所属学年">2026 届</td>
+                <td data-label="状态"><span class="pill published">已发布</span></td>
+                <td data-label="操作">
+                  <div class="acts">
+                    <button class="act" onclick="openDrawer('d')">查看详情</button>
+                    <button class="act primary" onclick="openConfirm('choose')">选择此题</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <span class="info">共 24 条，第 1 / 3 页</span>
+          <div class="pages">
+            <button class="pg" disabled>上一页</button>
+            <button class="pg on">1</button>
+            <button class="pg">2</button>
+            <button class="pg">3</button>
+            <button class="pg">下一页</button>
+          </div>
+        </div>
+
+        <div class="note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div>
+            <b>后端缺口（实现时需在文档与 UI 标注）：</b>
+            ① <code>GET /api/selection-rounds/</code> 为管理员接口，学生端轮次状态依赖待补的 <code>/api/selection-rounds/current/</code>，接口缺失时降级为灰色提示条且<b>不禁用</b>操作按钮，由后端报错兜底；
+            ② <code>selection-result</code> 仅返回 <code>topic_id</code> 与 <code>topic_title</code>，指导教师/学年/来源/提交时间需再查题目详情；
+            ③ 后端<b>无取消选题</b>端点，变更只能通过改选。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 详情抽屉 -->
+  <div class="drawer-mask" id="drawerMask" onclick="closeDrawer()"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+      <div>
+        <h3 id="dTitle">校园二手交易平台的设计与实现</h3>
+        <div class="sub" id="dSub">教师申报 · 2026 届 · ID 102</div>
+      </div>
+      <button class="x" onclick="closeDrawer()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="kv"><div class="k">当前状态</div><div class="v"><span class="pill published">已发布</span></div></div>
+      <div class="kv"><div class="k">指导教师</div><div class="v">张敏</div></div>
+      <div class="kv"><div class="k">题目来源</div><div class="v">教师申报</div></div>
+      <div class="kv"><div class="k">所属学年</div><div class="v">2026 届</div></div>
+      <div class="kv"><div class="k">已选人数</div><div class="v">— （后端未提供，不展示确切数值）</div></div>
+      <div class="kv" style="flex-direction: column; align-items: stretch">
+        <div class="k" style="width: auto; margin-bottom: 4px">题目描述</div>
+        <div class="desc-box">面向校园场景设计并实现一套二手交易平台，包含商品发布、检索、在线沟通与交易流程管理，后端采用 Django REST Framework，前端采用 Vue 3。</div>
+      </div>
+      <div class="note" style="margin-top: 16px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div>题目<b>先到先得</b>。点击底部按钮后仍需二次确认；若在你确认前已被其他同学选定，系统会返回错误提示。</div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn btn-ghost" onclick="closeDrawer()">关闭</button>
+      <button class="btn btn-primary" id="dAction" onclick="closeDrawer(); openConfirm('choose')">选择此题</button>
+    </div>
+  </aside>
+
+  <!-- 确认弹窗 -->
+  <div class="mask" id="mask">
+    <div class="modal">
+      <div class="modal-head" id="cTitle">确认选题</div>
+      <div class="modal-body">
+        <div class="lead" id="cLead">确认选择该题目？选题后如需更换，只能通过「改选」操作。</div>
+        <div class="confirm-info" id="cInfo">
+          题目：校园二手交易平台的设计与实现<br />指导教师：张敏<br />说明：题目先到先得，若已被其他同学选定将无法选择。
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeConfirm()">取消</button>
+        <button class="btn btn-primary" onclick="closeConfirm()">确认选题</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  var state = 'none'
+  var round = 'open'
+
+  var ROUND = {
+    open:    { no: '1', pill: 'live',   pillText: '进行中', time: '开放 2026-04-11 09:00　截止 2026-04-25 23:59', can: true },
+    pending: { no: '2', pill: 'wait',   pillText: '待开始', time: '开放 2026-05-06 09:00　截止 2026-05-16 23:59', can: false },
+    closed:  { no: '1', pill: 'done',   pillText: '已结束', time: '开放 2026-03-02 09:00　截止 2026-03-09 23:59', can: false },
+    unknown: { no: '?', pill: 'gray',   pillText: '状态未知', time: '选题轮次状态暂不可知，可尝试选择，最终以系统返回为准', can: true },
+  }
+  var TIP = {
+    open:    '当前第 1 轮选题已开放，可在下方列表中选择题目，或前往「题目浏览」查看全部已发布题目。',
+    pending: '选题轮次尚未开放（第 2 轮将于 2026-05-06 09:00 开始），开放后才能选题。',
+    closed:  '本届选题已结束。如需变更请联系管理员。',
+    unknown: '选题轮次状态暂不可知，可尝试选择，最终以系统返回为准。',
+  }
+
+  function setRound(r) {
+    round = r
+    var ids = ['open', 'pending', 'closed', 'unknown']
+    ids.forEach(function (k) {
+      document.getElementById('btn-' + k).classList.toggle('on', k === r)
+    })
+    var cfg = ROUND[r]
+    document.getElementById('roundNo').textContent = cfg.no
+    document.getElementById('roundTitle').textContent = r === 'unknown' ? '选题轮次' : '第 ' + cfg.no + ' 轮选题'
+    var pill = document.getElementById('roundPill')
+    pill.className = 'pill ' + cfg.pill
+    pill.textContent = cfg.pillText
+    document.getElementById('roundTime').textContent = cfg.time
+    var bar = document.getElementById('roundBar')
+    bar.className = 'round-bar' + (r === 'closed' ? ' closed' : r === 'pending' ? ' pending' : r === 'unknown' ? ' unknown' : '')
+    apply()
+  }
+
+  function setState(s) {
+    state = s
+    document.getElementById('btn-none').classList.toggle('on', s === 'none')
+    document.getElementById('btn-done').classList.toggle('on', s === 'done')
+    document.getElementById('viewDone').classList.toggle('hidden', s !== 'done')
+    document.getElementById('viewNone').classList.toggle('hidden', s !== 'none')
+    document.getElementById('rowCurrent').classList.toggle('hidden', s !== 'done')
+    apply()
+  }
+
+  function apply() {
+    var cfg = ROUND[round]
+    document.getElementById('btnChange').disabled = !cfg.can
+    var acts = document.querySelectorAll('td .act.primary')
+    for (var i = 0; i < acts.length; i++) {
+      if (acts[i].textContent.indexOf('当前选题') === -1) acts[i].disabled = !cfg.can
+    }
+    document.getElementById('noneTip').textContent = TIP[round]
+    var b = document.getElementById('btnB')
+    if (b) b.textContent = state === 'done' ? '改选为此题' : '选择此题'
+    document.getElementById('dAction').textContent = state === 'done' ? '改选为此题' : '选择此题'
+    document.getElementById('dAction').disabled = !cfg.can
+  }
+
+  function openConfirm(mode) {
+    var isChange = mode === 'change' || state === 'done'
+    document.getElementById('cTitle').textContent = isChange ? '确认改选' : '确认选题'
+    document.getElementById('cLead').textContent = isChange
+      ? '当前选题《光伏发电系统最大功率点跟踪控制策略研究》将被释放，其他同学可立即选定，且无法撤销。'
+      : '确认选择该题目？选题后如需更换，只能通过「改选」操作。'
+    document.getElementById('cInfo').innerHTML = isChange
+      ? '改选为：校园二手交易平台的设计与实现<br />指导教师：张敏<br />释放原选题：光伏发电系统最大功率点跟踪控制策略研究'
+      : '题目：校园二手交易平台的设计与实现<br />指导教师：张敏<br />说明：题目先到先得，若已被其他同学选定将无法选择。'
+    document.querySelector('#mask .btn-primary').textContent = isChange ? '确认改选' : '确认选题'
+    document.getElementById('mask').classList.add('show')
+  }
+  function closeConfirm() { document.getElementById('mask').classList.remove('show') }
+
+  function openDrawer(which) {
+    var map = {
+      current: ['光伏发电系统最大功率点跟踪控制策略研究', '教师申报 · 2026 届 · ID 4', '李建国'],
+      b: ['校园二手交易平台的设计与实现', '教师申报 · 2026 届 · ID 102', '张敏'],
+      c: ['煤矿巷道围岩稳定性数值模拟分析', '管理员录入 · 2026 届 · ID 101', '赵振华'],
+      d: ['基于机器学习的风电功率预测方法研究', '教师申报 · 2026 届 · ID 105', '孙立鹏'],
+    }
+    var m = map[which] || map.b
+    document.getElementById('dTitle').textContent = m[0]
+    document.getElementById('dSub').textContent = m[1]
+    document.getElementById('drawerMask').classList.add('show')
+    document.getElementById('drawer').classList.add('show')
+  }
+  function closeDrawer() {
+    document.getElementById('drawerMask').classList.remove('show')
+    document.getElementById('drawer').classList.remove('show')
+  }
+
+  function toggleErr() { document.getElementById('errBar').classList.toggle('hidden') }
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open')
+    document.getElementById('scrim').classList.toggle('show')
+  }
+
+  setRound('open')
+  setState('none')
+</script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import Login from '@/views/auth/Login.vue'
 import ForceChangePwd from '@/views/auth/ForceChangePwd.vue'
 import Dashboard from '@/views/home/Dashboard.vue'
 import TopicBrowse from '@/views/student/TopicBrowse.vue'
+import MySelection from '@/views/student/MySelection.vue'
 import ComingSoon from '@/views/ComingSoon.vue'
 import MyTopics from '@/views/teacher/MyTopics.vue'
 import AcademicYear from '@/views/admin/AcademicYear.vue'
@@ -43,7 +44,7 @@ const routes = [
   { path: '/my-supervision', name: 'my-supervision', component: ComingSoon, meta: { title: '我的指导情况', layout: 'app', roles: ['TEACHER'] } },
   // 学生
   { path: '/topic-browse', name: 'topic-browse', component: TopicBrowse, meta: { title: '题目浏览', layout: 'app', roles: ['STUDENT'] } },
-  { path: '/my-selection', name: 'my-selection', component: ComingSoon, meta: { title: '我的选题', layout: 'app', roles: ['STUDENT'] } },
+  { path: '/my-selection', name: 'my-selection', component: MySelection, meta: { title: '我的选题', layout: 'app', roles: ['STUDENT'] } },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
