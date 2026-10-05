@@ -5,6 +5,7 @@ import { getOperationLogs } from '@/api/audit'
 import { actionMeta, logSnapshot } from '@/utils/operationLog'
 import OperationLogFilters from '@/components/admin/OperationLogFilters.vue'
 import OperationLogDetailDrawer from '@/components/admin/OperationLogDetailDrawer.vue'
+import Pagination from '@/components/common/Pagination.vue'
 
 const PAGE_SIZE = 20
 
@@ -108,107 +109,18 @@ function closeDetail() {
     </div>
 
     <!-- 分页 -->
-    <div v-if="!isLoading && !isError && list.length" class="mt-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="text-[13px] text-gray-500">共 {{ total }} 条 · 每页 {{ PAGE_SIZE }} 条</div>
-      <div class="flex items-center gap-1.5">
-        <button class="pg" :disabled="page <= 1" @click="page--">上一页</button>
-        <button v-for="p in pageNumbers" :key="p" class="pg" :class="p === page ? 'pg-active' : ''" @click="page = p">{{ p }}</button>
-        <button class="pg" :disabled="page >= totalPages" @click="page++">下一页</button>
-      </div>
-    </div>
+    <Pagination
+      v-if="!isLoading && !isError && list.length"
+      :page="page"
+      :total-pages="totalPages"
+      :total="total"
+      :page-numbers="pageNumbers"
+      @update:page="page = $event"
+    >
+      <template #summary>共 {{ total }} 条 · 每页 {{ PAGE_SIZE }} 条</template>
+    </Pagination>
 
     <!-- 详情抽屉 -->
     <OperationLogDetailDrawer v-if="drawerOpen" :log="selected" @close="closeDetail" />
   </div>
 </template>
-
-<style scoped>
-.act {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #c0202e;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.act:hover {
-  background: #fdecee;
-  border-color: #f6d3d7;
-}
-.pg {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.pg:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #d1d5db;
-}
-.pg:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.pg-active {
-  background: #c0202e;
-  border-color: #c0202e;
-  color: #fff;
-}
-
-/* 超窄屏（≤560px）：表格转为卡片列表，避免横向滚动 */
-@media (max-width: 560px) {
-  .card-wrap {
-    border: none;
-    background: transparent;
-    overflow: visible;
-  }
-  table, thead, tbody, tr, td {
-    display: block;
-    width: 100% !important;
-  }
-  thead {
-    display: none;
-  }
-  tr {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    padding: 4px 14px;
-    background: #fff;
-  }
-  td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    padding: 11px 0;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  td:last-child {
-    border-bottom: none;
-  }
-  td::before {
-    content: attr(data-label);
-    font-size: 12.5px;
-    color: #6b7280;
-    font-weight: 600;
-    flex: none;
-  }
-}
-</style>

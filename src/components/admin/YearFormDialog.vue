@@ -1,5 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'
 
 // 新增 / 编辑届次表单弹窗。纯 UI：仅负责收集并校验表单，提交时 emit('submit', payload)，
 // 实际的 create/update mutation 由父页面执行。编辑模式隐藏「设为当前」复选框（改用操作列独立按钮）。
@@ -59,22 +65,17 @@ function onSubmit() {
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4"
-    @click.self="emit('close')"
-  >
-    <div class="w-[440px] max-w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+  <Dialog :open="open" @update:open="(v) => { if (!v) emit('close') }">
+    <DialogContent class="max-w-[440px] p-0" :show-close="false">
       <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h3 class="text-[17px] font-semibold text-gray-900">
+        <DialogTitle class="text-[17px] font-semibold text-gray-900">
           {{ mode === 'edit' ? '编辑届次' : '新增届次' }}
-        </h3>
-        <button
+        </DialogTitle>
+        <DialogClose
           class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition hover:bg-gray-200"
-          @click="emit('close')"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
+        </DialogClose>
       </div>
 
       <div class="px-5 py-5">
@@ -119,13 +120,12 @@ function onSubmit() {
       </div>
 
       <div class="flex justify-end gap-2.5 border-t border-gray-100 bg-gray-50 px-5 py-3.5">
-        <button
+        <DialogClose
           class="h-10 rounded-[10px] border border-gray-200 bg-white px-4 text-[14px] font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
-          @click="emit('close')"
           :disabled="loading"
         >
           取消
-        </button>
+        </DialogClose>
         <button
           class="h-10 rounded-[10px] bg-[#C0202E] px-4 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px disabled:opacity-60"
           @click="onSubmit"
@@ -134,6 +134,6 @@ function onSubmit() {
           {{ loading ? '保存中…' : (mode === 'edit' ? '保存' : '确认新增') }}
         </button>
       </div>
-    </div>
-  </div>
+    </DialogContent>
+  </Dialog>
 </template>

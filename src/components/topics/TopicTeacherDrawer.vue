@@ -5,8 +5,15 @@
 import { ref, computed, unref } from 'vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { submitReview } from '@/api/topics'
-import { statusLabel, statusVariant, sourceLabel } from '@/utils/topics'
+import { statusLabel, sourceLabel } from '@/utils/topics'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import StatusBadge from '@/components/topics/StatusBadge.vue'
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetClose,
+} from '@/components/ui/sheet'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -14,15 +21,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'edit', 'submitted'])
 
-const BADGE = {
-  green: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  red: 'bg-red-50 text-red-700 border border-red-200',
-  amber: 'bg-amber-50 text-amber-700 border border-amber-200',
-  blue: 'bg-blue-50 text-blue-700 border border-blue-200',
-  gray: 'bg-gray-100 text-gray-600 border border-gray-200',
-  purple: 'bg-violet-50 text-violet-700 border border-violet-200',
-}
-const statusBadge = (s) => BADGE[statusVariant(s)] || BADGE.gray
 const teacherText = (id) => (id != null ? `教师 #${id}` : '—')
 
 const canAct = computed(() => ['DRAFT', 'REJECTED'].includes(props.topic?.status))
@@ -39,25 +37,17 @@ const submitMutation = useMutation({
 })
 const submitting = computed(() => unref(submitMutation.isPending))
 
-function closeAll() {
-  confirmOpen.value = false
-  emit('close')
-}
 function onConfirmSubmit() {
   if (props.topic) submitMutation.mutate(props.topic.id)
 }
 </script>
 
 <template>
-  <div v-if="open && topic" class="fixed inset-0 z-50 bg-black/40" @click="closeAll" />
-  <Transition name="drawer">
-    <aside
-      v-if="open && topic"
-      class="drawer fixed right-0 top-0 z-[55] flex h-full w-[480px] max-w-[calc(100vw-32px)] flex-col bg-white shadow-2xl"
-    >
+  <Sheet :open="open && !!topic" @update:open="(v) => { if (!v) emit('close') }">
+    <SheetContent side="right" :show-close="false">
       <div class="flex items-start justify-between gap-3 border-b border-gray-200 p-5">
         <div>
-          <h3 class="text-[18px] font-bold leading-[1.45] text-gray-900">{{ topic.title }}</h3>
+          <SheetTitle class="text-[18px] font-bold leading-[1.45] text-gray-900">{{ topic.title }}</SheetTitle>
           <div class="mt-1.5 flex items-center gap-2 text-[12.5px] text-gray-400">
             <span>{{ sourceLabel(topic.topic_source) }}</span>
             <span>·</span>
@@ -66,20 +56,17 @@ function onConfirmSubmit() {
             <span>ID {{ topic.id }}</span>
           </div>
         </div>
-        <button
+        <SheetClose
           class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 transition hover:bg-gray-200"
-          @click="closeAll"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
+        </SheetClose>
       </div>
 
       <div class="flex-1 overflow-y-auto p-5">
         <div class="mb-4 inline-flex items-center gap-2">
           <span class="text-[12.5px] font-semibold text-gray-500">当前状态</span>
-          <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-semibold" :class="statusBadge(topic.status)">
-            {{ statusLabel(topic.status) }}
-          </span>
+          <StatusBadge :status="topic.status" />
         </div>
 
         <div class="kv"><div class="k">题目来源</div><div class="v">{{ sourceLabel(topic.topic_source) }}</div></div>
@@ -123,8 +110,8 @@ function onConfirmSubmit() {
           该题目当前为「{{ statusLabel(topic.status) }}」，无需操作；可在管理员处理后继续。
         </p>
       </div>
-    </aside>
-  </Transition>
+    </SheetContent>
+  </Sheet>
 
   <ConfirmDialog
     :open="confirmOpen && !submitting"
@@ -136,34 +123,3 @@ function onConfirmSubmit() {
     @confirm="onConfirmSubmit"
   />
 </template>
-
-<style scoped>
-.kv {
-  display: flex;
-  gap: 14px;
-  padding: 13px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-.kv:last-of-type {
-  border-bottom: none;
-}
-.kv .k {
-  width: 84px;
-  flex: none;
-  font-size: 13px;
-  font-weight: 600;
-  color: #9ca3af;
-}
-.kv .v {
-  flex: 1;
-  font-size: 14px;
-  color: #374151;
-}
-.drawer {
-  transition: transform 0.25s ease;
-}
-.drawer-enter-from,
-.drawer-leave-to {
-  transform: translateX(100%);
-}
-</style>

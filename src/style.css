@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 /* 自定义设计令牌（Tailwind v4 通过 @theme 暴露为 text-brand / bg-brand 等工具类） */
 @theme {
@@ -20,7 +21,7 @@
   --popover: #ffffff;
   --popover-foreground: #1f2937;
 
-  --primary: #4f46e5;
+  --primary: #C0202E;
   --primary-foreground: #ffffff;
 
   --secondary: #f3f4f6;
@@ -29,15 +30,15 @@
   --muted: #f3f4f6;
   --muted-foreground: #6b7280;
 
-  --accent: #f3f4f6;
-  --accent-foreground: #1f2937;
+  --accent: #fdecee;
+  --accent-foreground: #8F1822;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
   --border: #e5e7eb;
   --input: #e5e7eb;
-  --ring: #4f46e5;
+  --ring: #C0202E;
 }
 
 /* 将 shadcn 令牌映射为 Tailwind 颜色 / 圆角工具类（bg-primary、text-foreground…） */
@@ -131,6 +132,83 @@ body {
   background: #fef2f2;
   border-color: #fca5a5;
   color: #b91c1c;
+}
+
+/* ===== 共享：分页按钮（.pg）===== */
+.pg {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.pg:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+.pg:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.pg-active {
+  background: #c0202e;
+  border-color: #c0202e;
+  color: #fff;
+}
+
+/* ===== 共享：详情抽屉/弹窗的键值对行 =====
+   .kv 为「左标签 + 右值」横向布局（题目详情等复用）；
+   .kv-stack 为「标签在上、值在下」纵向布局（操作日志详情等长文本复用）。 */
+.kv {
+  display: flex;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.kv:last-child,
+.kv:last-of-type {
+  border-bottom: none;
+}
+.kv .k {
+  width: 84px;
+  flex: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9ca3af;
+}
+.kv .v {
+  flex: 1;
+  font-size: 14px;
+  color: #374151;
+}
+.kv-stack {
+  display: block;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.kv-stack:last-child,
+.kv-stack:last-of-type {
+  border-bottom: none;
+}
+.kv-stack .k {
+  width: auto;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6b7280;
+}
+.kv-stack .v {
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.6;
+  word-break: break-all;
 }
 
 @media (max-width: 560px) {

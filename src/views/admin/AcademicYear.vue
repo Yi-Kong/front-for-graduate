@@ -203,107 +203,17 @@ function yearBadge(name) {
 </template>
 
 <style scoped>
-.act {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.act:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #1f2937;
-}
-.act:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.act-primary {
-  color: #c0202e;
-  background: #fdecee;
-  border-color: #f6d3d7;
-}
-.act-primary:hover:not(:disabled) {
-  background: #fbdde0;
-  border-color: #efc2c7;
-  color: #8f1822;
-}
-.act-danger {
-  color: #dc2626;
-  border-color: #fecaca;
-}
-.act-danger:hover:not(:disabled) {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #b91c1c;
-}
-
-/* 超窄屏（≤560px）：表格转为卡片列表，避免横向滚动 */
+/* 超窄屏（≤560px）：仅保留本页特有规则——当前届次行高亮与学年列右对齐。
+   表格卡片化、.act、.acts 等通用规则已统一由全局 style.css 的 .card-wrap 提供。 */
 @media (max-width: 560px) {
-  .card-wrap {
-    border: none;
-    background: transparent;
-    overflow: visible;
-  }
-  table,
-  thead,
-  tbody,
-  tr,
-  td {
-    display: block;
-    width: 100% !important;
-  }
-  thead {
-    display: none;
-  }
-  tr {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    padding: 4px 14px;
-    background: #fff;
-  }
   tr.bg-\[\#fdecee\] {
     background: #fdecee;
-  }
-  td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    padding: 11px 0;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  td:last-child {
-    border-bottom: none;
-  }
-  td::before {
-    content: attr(data-label);
-    font-size: 12.5px;
-    color: #6b7280;
-    font-weight: 600;
-    flex: none;
   }
   .year-cell {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     text-align: right;
-  }
-  .acts {
-    justify-content: flex-end;
-    flex-wrap: wrap;
   }
 }
 </style>

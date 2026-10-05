@@ -7,6 +7,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { createTopic, updateTopic } from '@/api/topics'
 import { getAcademicYears } from '@/api/academic'
 import { useAuthStore } from '@/store/auth'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -91,20 +97,15 @@ function onSubmit() {
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4"
-    @click.self="emit('close')"
-  >
-    <div class="w-[560px] max-w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+  <Dialog :open="open" @update:open="(v) => { if (!v) emit('close') }">
+    <DialogContent class="max-w-[560px] p-0" :show-close="false">
       <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h3 class="text-[17px] font-bold text-gray-900">{{ isEdit ? '编辑题目' : '新建题目' }}</h3>
-        <button
+        <DialogTitle class="text-[17px] font-bold text-gray-900">{{ isEdit ? '编辑题目' : '新建题目' }}</DialogTitle>
+        <DialogClose
           class="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-gray-100 text-gray-400 transition hover:bg-gray-200"
-          @click="emit('close')"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
+        </DialogClose>
       </div>
 
       <div class="px-5 py-4">
@@ -170,13 +171,12 @@ function onSubmit() {
       </div>
 
       <div class="flex justify-end gap-2.5 border-t border-gray-100 bg-gray-50 px-5 py-3.5">
-        <button
+        <DialogClose
           class="h-10 rounded-[10px] border border-gray-200 bg-white px-4 text-[14px] font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
           :disabled="saving"
-          @click="emit('close')"
         >
           取消
-        </button>
+        </DialogClose>
         <button
           class="h-10 rounded-[10px] bg-[#C0202E] px-5 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px disabled:opacity-60"
           :disabled="saving"
@@ -185,6 +185,6 @@ function onSubmit() {
           {{ saving ? '保存中…' : '保存' }}
         </button>
       </div>
-    </div>
-  </div>
+    </DialogContent>
+  </Dialog>
 </template>

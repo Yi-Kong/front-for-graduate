@@ -264,38 +264,3 @@ function downloadErrors() {
     />
   </div>
 </template>
-
-<style scoped>
-.act {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.act:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #1f2937;
-}
-.act-primary {
-  color: #c0202e;
-  background: #fdecee;
-  border-color: #f6d3d7;
-}
-.act-primary:hover {
-  background: #fbdde0;
-  border-color: #efc2c7;
-  color: #8f1822;
-}
-</style>

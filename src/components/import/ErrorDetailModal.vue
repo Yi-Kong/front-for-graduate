@@ -1,6 +1,13 @@
 <script setup>
 // 导入错误明细弹窗（复用真实接口 GET /api/imports/:pk/errors/ 的数据）。
 // 纯展示组件：open 控制显隐，errors 为逐行错误数组 [{ row_no, field_name, raw_value, error_message }]。
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'
+
 defineProps({
   open: { type: Boolean, default: false },
   title: { type: String, default: '当次导入错误明细' },
@@ -11,17 +18,16 @@ const emit = defineEmits(['close'])
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4"
-    @click.self="emit('close')"
-  >
-    <div class="flex max-h-[calc(100vh-64px)] w-[720px] max-w-full flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+  <Dialog :open="open" @update:open="(v) => { if (!v) emit('close') }">
+    <DialogContent
+      class="flex max-h-[calc(100vh-64px)] w-[720px] max-w-full flex-col overflow-hidden p-0"
+      :show-close="false"
+    >
       <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h3 class="text-[17px] font-semibold text-gray-900">{{ title }}</h3>
-        <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition hover:bg-gray-200" @click="emit('close')">
+        <DialogTitle class="text-[17px] font-semibold text-gray-900">{{ title }}</DialogTitle>
+        <DialogClose class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition hover:bg-gray-200">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
+        </DialogClose>
       </div>
 
       <div class="overflow-auto px-5 py-4">
@@ -49,12 +55,14 @@ const emit = defineEmits(['close'])
       </div>
 
       <div class="flex justify-end gap-2.5 border-t border-gray-100 bg-gray-50 px-5 py-3.5">
-        <button class="h-10 rounded-[10px] border border-gray-200 bg-white px-4 text-[14px] font-semibold text-gray-700 transition hover:bg-gray-50" @click="emit('close')">关闭</button>
-        <button class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#C0202E] px-4 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px" @click="emit('close')">
+        <DialogClose class="h-10 rounded-[10px] border border-gray-200 bg-white px-4 text-[14px] font-semibold text-gray-700 transition hover:bg-gray-50">
+          关闭
+        </DialogClose>
+        <DialogClose class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-[#C0202E] px-4 text-[14px] font-semibold text-white transition hover:bg-[#8F1822] active:translate-y-px">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3v12M8 11l4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 19h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
           下载错误明细
-        </button>
+        </DialogClose>
       </div>
-    </div>
-  </div>
+    </DialogContent>
+  </Dialog>
 </template>

@@ -6,6 +6,13 @@ import { getTopics } from '@/api/topics'
 import { getAcademicYears } from '@/api/academic'
 import { statusLabel, sourceLabel } from '@/utils/topics'
 import TopicTable from '@/components/topics/TopicTable.vue'
+import Pagination from '@/components/common/Pagination.vue'
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetClose,
+} from '@/components/ui/sheet'
 
 const router = useRouter()
 const PAGE_SIZE = 10
@@ -58,13 +65,6 @@ function onReset() {
   filters.value = { keyword: '', year: '', supervisor: '' }
   page.value = 1
 }
-function prevPage() {
-  if (page.value > 1) page.value -= 1
-}
-function nextPage() {
-  if (page.value < totalPages.value) page.value += 1
-}
-
 // 详情抽屉
 const drawerOpen = ref(false)
 const current = ref(null)
@@ -156,37 +156,29 @@ function goSelect() {
     <div v-else>
       <TopicTable :topics="rows" @view="openDetail" />
 
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="text-[13px] text-gray-500">
-          共 <b class="text-gray-900">{{ total }}</b> 条 · 第 <b class="text-gray-900">{{ page }}</b> / {{ totalPages }} 页
-        </div>
-        <div class="flex gap-1.5">
-          <button class="pg" :disabled="page <= 1" @click="prevPage">上一页</button>
-          <button class="pg" :disabled="page >= totalPages" @click="nextPage">下一页</button>
-        </div>
-      </div>
+      <Pagination
+        :page="page"
+        :total-pages="totalPages"
+        :total="total"
+        @update:page="page = $event"
+      />
     </div>
 
     <!-- 详情抽屉 -->
-    <div v-if="drawerOpen" class="fixed inset-0 z-50 bg-black/40" @click="drawerOpen = false" />
-    <Transition name="drawer">
-      <aside
-        v-if="drawerOpen && current"
-        class="drawer fixed right-0 top-0 z-[55] flex h-full w-[460px] max-w-[calc(100vw-32px)] flex-col bg-white shadow-2xl"
-      >
+    <Sheet :open="drawerOpen && !!current" @update:open="(v) => { if (!v) drawerOpen = false }">
+      <SheetContent side="right" :show-close="false">
         <div class="flex items-start justify-between gap-3 border-b border-gray-200 p-5">
           <div>
-            <h3 class="text-[18px] font-bold leading-[1.45] text-gray-900">{{ current.title }}</h3>
+            <SheetTitle class="text-[18px] font-bold leading-[1.45] text-gray-900">{{ current.title }}</SheetTitle>
             <div class="mt-1.5 text-[12.5px] text-gray-400">
               {{ sourceLabel(current.topic_source) }} · {{ current.yearName || `届次#${current.academic_year}` }}
             </div>
           </div>
-          <button
+          <SheetClose
             class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 transition hover:bg-gray-200"
-            @click="drawerOpen = false"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
+          </SheetClose>
         </div>
 
         <div class="flex-1 overflow-y-auto p-5">
@@ -211,60 +203,7 @@ function goSelect() {
             前往「我的选题」选择此题
           </button>
         </div>
-      </aside>
-    </Transition>
+      </SheetContent>
+    </Sheet>
   </div>
 </template>
-
-<style scoped>
-.pg {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.pg:hover:not(:disabled) {
-  border-color: #d1d5db;
-  background: #f9fafb;
-}
-.pg:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.kv {
-  display: flex;
-  gap: 14px;
-  padding: 13px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-.kv:last-child {
-  border-bottom: none;
-}
-.kv .k {
-  width: 84px;
-  flex: none;
-  font-size: 13px;
-  font-weight: 600;
-  color: #9ca3af;
-}
-.kv .v {
-  flex: 1;
-  font-size: 14px;
-  color: #374151;
-}
-.drawer {
-  transition: transform 0.25s ease;
-}
-.drawer-enter-from,
-.drawer-leave-to {
-  transform: translateX(100%);
-}
-</style>

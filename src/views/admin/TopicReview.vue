@@ -5,6 +5,7 @@ import { getTopics } from '@/api/topics'
 import { getAcademicYears } from '@/api/academic'
 import { statusLabel, sourceLabel } from '@/utils/topics'
 import TopicTable from '@/components/topics/TopicTable.vue'
+import Pagination from '@/components/common/Pagination.vue'
 import TopicReviewDrawer from '@/components/topics/TopicReviewDrawer.vue'
 
 const PAGE_SIZE = 20
@@ -72,12 +73,6 @@ function onQuery() {
 function onReset() {
   filters.value = { keyword: '', year: '' }
   page.value = 1
-}
-function prevPage() {
-  if (page.value > 1) page.value -= 1
-}
-function nextPage() {
-  if (page.value < totalPages.value) page.value += 1
 }
 
 // 审核抽屉
@@ -175,75 +170,15 @@ function refresh() {
         </template>
       </TopicTable>
 
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="text-[13px] text-gray-500">
-          共 <b class="text-gray-900">{{ total }}</b> 条 · 第 <b class="text-gray-900">{{ page }}</b> / {{ totalPages }} 页
-        </div>
-        <div class="flex gap-1.5">
-          <button class="pg" :disabled="page <= 1" @click="prevPage">上一页</button>
-          <button class="pg" :disabled="page >= totalPages" @click="nextPage">下一页</button>
-        </div>
-      </div>
+      <Pagination
+        :page="page"
+        :total-pages="totalPages"
+        :total="total"
+        @update:page="page = $event"
+      />
     </div>
 
     <!-- 审核抽屉 -->
     <TopicReviewDrawer v-if="drawerOpen" :open="drawerOpen" :topic="current" @close="drawerOpen = false" @updated="refresh" />
   </div>
 </template>
-
-<style scoped>
-.pg {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.pg:hover:not(:disabled) {
-  border-color: #d1d5db;
-  background: #f9fafb;
-}
-.pg:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.act {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  height: 30px;
-  padding: 0 11px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.act:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #1f2937;
-}
-.act-primary {
-  color: #c0202e;
-  background: #fdecee;
-  border-color: #f6d3d7;
-}
-.act-primary:hover {
-  background: #fbdde0;
-  border-color: #efc2c7;
-  color: #8f1822;
-}
-</style>
