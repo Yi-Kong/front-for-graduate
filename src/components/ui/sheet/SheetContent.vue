@@ -15,10 +15,12 @@ const props = defineProps({
 <template>
   <DialogPortal>
     <SheetOverlay />
+    <!-- z-[60]：必须高于 SheetOverlay 的 z-[55]（否则被遮罩盖住、抽屉内按钮点不动），
+         同时低于弹窗 z-[80] 与 Popover z-[100]，保证抽屉里弹出的确认框仍在最上层 -->
     <DialogContent
       :aria-describedby="undefined"
       :class="cn(
-        'fixed z-[55] gap-4 bg-white shadow-[-12px_0_40px_rgba(0,0,0,.18)] transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300',
+        'fixed z-[60] gap-4 bg-white shadow-[-12px_0_40px_rgba(0,0,0,.18)] transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300',
         side === 'right' && 'inset-y-0 right-0 h-full w-[480px] max-w-[calc(100vw-32px)] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
         side === 'left' && 'inset-y-0 left-0 h-full w-[480px] max-w-[calc(100vw-32px)] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
         side === 'top' && 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
