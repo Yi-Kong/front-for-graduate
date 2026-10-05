@@ -16,7 +16,7 @@ const props = defineProps({
   <DialogPortal>
     <SheetOverlay />
     <!-- z-[60]：必须高于 SheetOverlay 的 z-[55]（否则被遮罩盖住、抽屉内按钮点不动），
-         同时低于弹窗 z-[80] 与 Popover z-[100]，保证抽屉里弹出的确认框仍在最上层 -->
+         同时低于弹窗本体 z-[81] 与 Popover z-[100]，保证抽屉里弹出的确认框仍在最上层 -->
     <DialogContent
       :aria-describedby="undefined"
       :class="cn(
