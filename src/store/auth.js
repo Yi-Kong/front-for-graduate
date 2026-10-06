@@ -30,6 +30,9 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = data?.access || ''
     mustChangePassword.value = !!data?.must_change_password
     roleCodes.value = data?.role_codes || []
+    // 先落盘：request.js 的请求拦截器是从 localStorage 读 Authorization 的，
+    // 若等 /auth/me/ 回来后再 persist()，这次请求会漏带新令牌（或带上上一个账号的旧令牌）
+    persist()
     // 登录响应不含 user 对象，需再拉 /auth/me/ 获取用户详情
     try {
       user.value = await meApi()
@@ -51,7 +54,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 重新拉取当前用户信息（如刷新页面后补全 user 态）
   async function fetchMe() {
-    user.value = await meApi()
+    const me = await meApi()
+    user.value = me
+    // 角色以服务端返回为准，避免 /me/ 被二次调用后 roleCodes 留着旧值
+    roleCodes.value = me?.role_codes || roleCodes.value
+    // must_change_password 仅在服务端返回该字段时同步（文档的 /me/ 字段表未列，故不强制）
+    if (typeof me?.must_change_password === 'boolean') {
+      mustChangePassword.value = me.must_change_password
+    }
     persist()
     return user.value
   }
