@@ -1,8 +1,9 @@
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import SchoolEmblem from '@/components/SchoolEmblem.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -87,7 +88,13 @@ const userName = computed(() => auth.user?.real_name || '未命名用户')
 const userInitial = computed(() => (userName.value || '?').slice(0, 1))
 const userRoleLabel = computed(() => ROLE_LABEL[(auth.roleCodes || [])[0]] || '用户')
 
-function onLogout() {
+const showLogoutConfirm = ref(false)
+
+function requestLogout() {
+  showLogoutConfirm.value = true
+}
+
+function confirmLogout() {
   auth.logout()
   router.replace('/login')
 }
@@ -95,7 +102,7 @@ function onLogout() {
 
 <template>
   <aside
-    class="fixed inset-y-0 left-0 z-40 flex w-[248px] shrink-0 flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:static md:translate-x-0"
+    class="fixed inset-y-0 left-0 z-40 flex w-[248px] shrink-0 flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:sticky md:top-0 md:h-screen md:translate-x-0"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <!-- 品牌头 -->
@@ -135,13 +142,25 @@ function onLogout() {
         <div class="text-[11.5px] text-gray-400">{{ userRoleLabel }} · {{ (auth.roleCodes || [])[0] }}</div>
       </div>
       <button
-        class="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-gray-100 text-gray-400 transition hover:bg-[#fdecee] hover:text-[#C0202E]"
+        class="flex h-[34px] shrink-0 items-center gap-1.5 rounded-[10px] bg-gray-100 px-2.5 text-[12.5px] font-medium text-gray-500 transition hover:bg-[#fdecee] hover:text-[#C0202E] active:translate-y-px"
         title="退出登录"
-        @click="onLogout"
+        @click="requestLogout"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+        退出登录
       </button>
     </div>
+
+    <!-- 退出登录二次确认 -->
+    <ConfirmDialog
+      :open="showLogoutConfirm"
+      title="退出登录"
+      message="确定要退出当前账号吗？退出后需重新登录。"
+      confirm-text="退出"
+      cancel-text="取消"
+      @close="showLogoutConfirm = false"
+      @confirm="confirmLogout"
+    />
   </aside>
 </template>
 

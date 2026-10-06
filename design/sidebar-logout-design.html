@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>侧边栏「退出登录」· 视觉稿（山西能源学院）</title>
+<style>
+  :root {
+    --brand: #C0202E;
+    --brand-deep: #A81B28;
+    --brand-soft: #fdecee;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--ink); background: #eef0f3; min-height: 100vh; padding-bottom: 40px;
+  }
+  .bar {
+    position: sticky; top: 0; z-index: 50; background: #111827; color: #e5e7eb;
+    display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 12.5px;
+  }
+  .bar .lbl { opacity: .75; letter-spacing: .5px; }
+  .bar b { color: #fff; }
+
+  .wrap { display: flex; gap: 28px; padding: 26px; align-items: flex-start; flex-wrap: wrap; }
+
+  /* ---------- 侧边栏（248px，按真实尺寸 1:1 复刻） ---------- */
+  .sidebar {
+    width: 248px; background: #fff; border: 1px solid var(--line); border-radius: 0 0 4px 4px;
+    display: flex; flex-direction: column; min-height: 640px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .brand-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 18px; border-bottom: 1px solid var(--line);
+  }
+  .emblem {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    background: radial-gradient(circle at 50% 40%, #fdecee, #C0202E);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700;
+  }
+  .cn { font-size: 14px; font-weight: 700; letter-spacing: .5px; line-height: 1.2; }
+  .en { font-size: 9.5px; color: #9ca3af; letter-spacing: .5px; margin-top: 2px; }
+
+  .nav { flex: 1; padding: 12px; }
+  .group-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; padding: 10px 12px 6px; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 3px;
+    font-size: 14px; color: #374151;
+  }
+  .nav-item.on { background: var(--brand-soft); color: #8F1822; font-weight: 600; }
+  .ico { width: 18px; height: 18px; flex: none; }
+
+  /* ===== ★ 本次设计：底部用户区 + 退出登录按钮 ===== */
+  .user-foot {
+    border-top: 1px solid var(--line); padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    background: var(--brand); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+  .meta { flex: 1; min-width: 0; }
+  .meta .name { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta .role { font-size: 11.5px; color: #9ca3af; margin-top: 1px; }
+
+  .btn-logout {
+    flex: none; display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 10px; border: none; border-radius: 10px; cursor: pointer;
+    background: #f3f4f6; color: var(--muted);
+    font-size: 12.5px; font-weight: 500; font-family: inherit;
+    transition: background .15s, color .15s, transform .05s;
+  }
+  .btn-logout:hover { background: var(--brand-soft); color: var(--brand); }
+  .btn-logout:active { transform: translateY(1px); }
+  .btn-logout svg { width: 15px; height: 15px; flex: none; }
+
+  /* hover 演示副本 */
+  .user-foot.demo-hover .btn-logout { background: var(--brand-soft); color: var(--brand); }
+
+  /* ---------- 右侧说明区 ---------- */
+  .panel { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 16px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .card h3 { font-size: 14.5px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h3 .b { width: 4px; height: 15px; border-radius: 2px; background: var(--brand); }
+  .states { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .state { text-align: center; }
+  .state .lbl2 { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+
+  /* 确认框示意 */
+  .confirm-wrap { background: #f9fafb; border-radius: 10px; padding: 26px 16px; display: flex; justify-content: center; }
+  .dialog {
+    width: 320px; background: #fff; border-radius: 16px; padding: 22px 20px 18px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.12); border: 1px solid var(--line);
+  }
+  .dialog .d-ic {
+    width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 12px;
+    background: var(--brand-soft); color: var(--brand);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dialog .d-t { text-align: center; font-size: 15.5px; font-weight: 700; }
+  .dialog .d-s { text-align: center; font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 6px; }
+  .dialog .d-btns { display: flex; gap: 10px; margin-top: 18px; }
+  .dialog .d-btns button {
+    flex: 1; height: 42px; border-radius: 10px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    transition: background .15s, transform .05s;
+  }
+  .dialog .d-btns button:active { transform: translateY(1px); }
+  .btn-cancel { background: #f3f4f6; color: #374151; }
+  .btn-cancel:hover { background: #e5e7eb; }
+  .btn-ok { background: var(--brand); color: #fff; }
+  .btn-ok:hover { background: var(--brand-deep); }
+
+  ul.spec { list-style: none; font-size: 13px; color: #374151; line-height: 2; }
+  ul.spec li::before { content: "·"; color: var(--brand); font-weight: 700; margin-right: 8px; }
+  code { background: #f3f4f6; border-radius: 5px; padding: 1px 6px; font-size: 12px; color: #8F1822; }
+  .flow { font-size: 13px; color: #374151; line-height: 2.1; }
+  .flow b { color: #8F1822; }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <span class="lbl">视觉稿 · <b>侧边栏底部「退出登录」</b> · 批准后落地 AppSidebar.vue</span>
+  </div>
+
+  <div class="wrap">
+    <!-- 左：1:1 侧边栏复刻（默认态） -->
+    <div>
+      <div class="sidebar">
+        <div class="brand-head">
+          <div class="emblem">山</div>
+          <div>
+            <div class="cn">毕业设计综合管理系统</div>
+            <div class="en">SHANXI INSTITUTE OF ENERGY</div>
+          </div>
+        </div>
+        <nav class="nav">
+          <div class="group-label">通用</div>
+          <div class="nav-item"><span class="ico">▦</span>工作台</div>
+          <div class="group-label">管理员</div>
+          <div class="nav-item on"><span class="ico">◎</span>届次管理</div>
+          <div class="nav-item"><span class="ico">⇪</span>师生批量导入</div>
+          <div class="nav-item"><span class="ico">✓</span>题目审核</div>
+          <div class="nav-item"><span class="ico">◷</span>选题轮次管理</div>
+          <div class="nav-item"><span class="ico">▤</span>操作日志</div>
+        </nav>
+        <!-- ★ 底部用户区：图标 + 文字「退出登录」 -->
+        <div class="user-foot">
+          <div class="avatar">管</div>
+          <div class="meta">
+            <div class="name">王管理员</div>
+            <div class="role">管理员 · ADMIN</div>
+          </div>
+          <button class="btn-logout">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+            退出登录
+          </button>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:#9ca3af;margin-top:8px;text-align:center;">↑ 默认态（1:1 真实尺寸，可在页面上真实 hover）</div>
+    </div>
+
+    <!-- 右：状态与说明 -->
+    <div class="panel">
+      <div class="card">
+        <h3><span class="b"></span>按钮三态</h3>
+        <div class="states">
+          <div class="state">
+            <button class="btn-logout" style="cursor:default;">
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+              退出登录
+            </button>
+            <div class="lbl2">默认 · 底 #f3f4f6 / 字 #6b7280</div>
+          </div>
+          <div class="state">
+            <button class="btn-logout" style="cursor:default;background:var(--brand-soft);color:var(--brand);">
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+              退出登录
+            </button>
+            <div class="lbl2">hover · 底 #fdecee / 字 #C0202E</div>
+          </div>
+          <div class="state">
+            <button class="btn-logout" style="cursor:default;transform:translateY(1px);background:var(--brand-soft);color:var(--brand);">
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+              退出登录
+            </button>
+            <div class="lbl2">active · 下沉 1px</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="b"></span>点击后：二次确认（复用 ConfirmDialog）</h3>
+        <div class="confirm-wrap">
+          <div class="dialog">
+            <div class="d-ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 12H4M4 12l3.5-3.5M4 12l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.7"/></svg>
+            </div>
+            <div class="d-t">退出登录</div>
+            <div class="d-s">确定要退出当前账号吗？<br>退出后需重新登录。</div>
+            <div class="d-btns">
+              <button class="btn-cancel">取消</button>
+              <button class="btn-ok">退出</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="b"></span>交互流程</h3>
+        <div class="flow">
+          1. 点击 <b>退出登录</b> → 弹出二次确认框<br>
+          2. <b>取消</b> → 关闭弹窗，停留在当前页<br>
+          3. <b>退出</b> → <code>auth.logout()</code> 清 token/user → <code>router.replace('/login')</code><br>
+          4. 移动端抽屉侧边栏同样生效：先关抽屉再跳转
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="b"></span>实现要点</h3>
+        <ul class="spec">
+          <li>仅改 <code>AppSidebar.vue</code> 用户区（30px 纯图标钮 → 图标+文字按钮），不动其他区块</li>
+          <li>高 34px、圆角 10px，hover/active 沿用全站既有语言（#fdecee / #C0202E）</li>
+          <li>确认框复用公共 <code>ConfirmDialog.vue</code>，不新写弹窗组件</li>
+          <li>登出逻辑已有：<code>onLogout()</code> → <code>auth.logout()</code> + 跳登录页，仅加确认步骤</li>
+          <li>姓名过长时 <code>truncate</code> 兜底，按钮 <code>flex:none</code> 不被挤压</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
