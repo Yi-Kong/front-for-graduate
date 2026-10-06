@@ -4,8 +4,8 @@ import ForceChangePwd from '@/views/auth/ForceChangePwd.vue'
 import Dashboard from '@/views/home/Dashboard.vue'
 import TopicBrowse from '@/views/student/TopicBrowse.vue'
 import MySelection from '@/views/student/MySelection.vue'
-import ComingSoon from '@/views/ComingSoon.vue'
 import MyTopics from '@/views/teacher/MyTopics.vue'
+import MySupervision from '@/views/teacher/MySupervision.vue'
 import AcademicYear from '@/views/admin/AcademicYear.vue'
 import ImportUsers from '@/views/admin/ImportUsers.vue'
 import OperationLog from '@/views/admin/OperationLog.vue'
@@ -41,7 +41,7 @@ const routes = [
   { path: '/operation-logs', name: 'operation-logs', component: OperationLog, meta: { title: '操作日志', layout: 'app', roles: ['ADMIN'] } },
   // 教师
   { path: '/my-topics', name: 'my-topics', component: MyTopics, meta: { title: '我的题目申报', layout: 'app', roles: ['TEACHER'] } },
-  { path: '/my-supervision', name: 'my-supervision', component: ComingSoon, meta: { title: '我的指导情况', layout: 'app', roles: ['TEACHER'] } },
+  { path: '/my-supervision', name: 'my-supervision', component: MySupervision, meta: { title: '我的指导情况', layout: 'app', roles: ['TEACHER'] } },
   // 学生
   { path: '/topic-browse', name: 'topic-browse', component: TopicBrowse, meta: { title: '题目浏览', layout: 'app', roles: ['STUDENT'] } },
   { path: '/my-selection', name: 'my-selection', component: MySelection, meta: { title: '我的选题', layout: 'app', roles: ['STUDENT'] } },
