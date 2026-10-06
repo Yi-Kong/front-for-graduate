@@ -44,11 +44,11 @@ function stepsOf(row) {
       <thead>
         <tr class="bg-gray-50 text-left text-[12.5px] font-semibold text-gray-500">
           <th class="px-5 py-3" style="width: 16%">学生</th>
-          <th class="px-5 py-3" style="width: 26%">题目</th>
+          <th class="px-5 py-3" style="width: 24%">题目</th>
           <th class="px-5 py-3" style="width: 11%">来源</th>
           <th class="px-5 py-3" style="width: 10%">指导轮次</th>
           <th class="px-5 py-3" style="width: 23%">当前阶段</th>
-          <th class="px-5 py-3" style="width: 8%">状态</th>
+          <th class="px-5 py-3" style="width: 10%">状态</th>
           <th class="px-5 py-3" style="width: 6%">操作</th>
         </tr>
       </thead>

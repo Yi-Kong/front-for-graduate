@@ -22,7 +22,7 @@ const cls = computed(() => VARIANT[props.variant] || VARIANT.gray)
 
 <template>
   <span
-    class="inline-flex items-center rounded-full border px-2.5 py-1 text-[12px] font-semibold"
+    class="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[12px] font-semibold"
     :class="cls"
   >
     <slot />
